@@ -1,0 +1,13 @@
+Package: aautil
+Type: Package
+Title: utilities
+Version: 1.0
+Date: 2014-11-17
+Author: GH
+Maintainer: <giles.heywood@gmail.com>
+Description: data management
+License: GPL
+Depends:
+    R (>= 2.0.0),
+    data.table,
+    snowfall
