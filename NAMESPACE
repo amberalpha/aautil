@@ -2,7 +2,13 @@
 
 export(delrd)
 export(dirrd)
+export(dtlocf)
 export(getrd)
+export(greprd)
 export(idxrd)
+export(meantri)
+export(mynorm)
 export(newrd)
 export(putrd)
+export(rollxts)
+export(zoonorm)
