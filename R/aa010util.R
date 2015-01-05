@@ -139,9 +139,9 @@ dtlocf <- function(z,dates=seq(from=min(index(z)),to=max(index(z)),by=1),wd=1:5,
   dates <- as.Date(dates[as.POSIXlt(dates)$wday%in%wd])
   rownames(z)<-as.character(index(z))
   #dt <- setkey(data.table(mattotab(z)),bui,date)
-  dt <- setkey(data.table(mattotab(z))[,date:=as.Date(date)],bui,date)
+  dt <- setkey(data.table(mattotab(z))[,date:=as.Date(fastPOSIXct(date))],bui,date)
   dt1 <- dt[!is.na(field)][CJ(unique(dt[,bui]),dates),roll=roll,rollends=rollends]
-  dt1[,date:=as.character(date)]
+  dt1[,date:=as.character(date)] #this is slow, lubridate is slow, fastposixct slow
   mat <- as.matrix(tabtomat(data.frame(setcolorder(dt1,c('date','bui','field'))))[,colnames(z)])
   colnames(mat) <- j
   zoo(mat,as.Date(rownames(mat)))

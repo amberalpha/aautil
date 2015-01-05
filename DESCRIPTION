@@ -10,4 +10,6 @@ License: GPL
 Depends:
     R (>= 2.0.0),
     data.table,
-    snowfall
+    snowfall,
+    fasttime,
+    zoo
