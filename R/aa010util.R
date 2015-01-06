@@ -225,3 +225,96 @@ dtlocf <- function(z,dates=seq(from=min(index(z)),to=max(index(z)),by=1),wd=1:5,
   stopifnot(identical(dim(res),dim(x)) && identical(sum(is.na(x)),sum(is.na(res))))
   res
 }
+
+#' make directory
+#'
+#' make directory if it does not exist
+#' @param dd path
+#' @keywords utility
+#' @export
+mkdirn <- function(dd) {
+  if(all(is.na(file.info(dd))))  suppressWarnings(system(paste0("mkdir ",dd)))
+}
+
+
+#' extract dates
+#'
+#' @export
+extractDates <-
+  function(
+    dates,
+    weekday=FALSE,
+    find=c("all","last","first"),
+    period=c("week","month","year"),
+    partials=TRUE,
+    firstlast=FALSE,
+    select)
+  {    
+    find <- match.arg(find)
+    period <- match.arg(period)
+    myindex1 <- 1:length(dates)
+    #1  optionally point only to weekdays
+    if(weekday) {
+      wday <- as.POSIXlt(dates)$wday
+      myindex1 <- which( (0 < wday) & (wday < 6) )
+    }
+    if(period=="month") {
+      theperiod <- 100*as.POSIXlt(dates[myindex1])$year+as.POSIXlt(dates[myindex1])$mon
+      dayinperiod <- as.POSIXlt(dates[myindex1])$mday
+    } else if(period=="year") {
+      theperiod <- as.POSIXlt(dates[myindex1])$year
+      dayinperiod <- as.POSIXlt(dates[myindex1])$yday
+    } else if(period=="week") {
+      theweek <- as.numeric(format(as.POSIXct(dates[myindex1]), "%U") )
+      theyear <- as.numeric(format(dates[myindex1],"%Y"))
+      incorrectPartialWeek <- theweek==0
+      theyear[incorrectPartialWeek] <- theyear[incorrectPartialWeek]-1    #first partial week in January assigned to last year
+      theweek[incorrectPartialWeek] <- as.numeric(format(ISOdate(theyear[incorrectPartialWeek]-1,12,31),"%U"))    #only incomplete Jan weeks are indexed 0 (see Jan 1995)
+      theperiod <- 100*theyear+theweek
+      dayinperiod <- as.POSIXlt(dates[myindex1])$wday
+    }
+    #2  if selecting based on 'find'
+    if(find=="all"){
+      myindex2 <- 1:length(myindex1)
+    } else {
+      myindex2 <- setdiff(which(diff(c(theperiod[1],theperiod))!=0),1)
+      if(find=="last") {
+        myindex2 <- myindex2-1
+      }
+      if(partials){
+        if(find=="last") {
+          myindex2 <- unique(c(myindex2,length(myindex1)))
+        } else {
+          myindex2 <- unique(c(1,myindex2))
+        }
+      }
+    }
+    #3 select based on 'select'
+    if(missing(select)||is.na(select)||is.null(select)) {
+      myindex3 <- 1:length(myindex2)
+    } else {
+      myindex3 <- which(dayinperiod[myindex2]%in%select)
+    }
+    myindex <- myindex1[myindex2][myindex3]
+    if(firstlast) {
+      myindex <- unique(c(1,myindex,myindex1[length(myindex1)]))
+    }
+    if(all(is.na(myindex))) myindex <- NULL
+    return(dates[myindex])
+  }
+
+#' table to matrix
+#'
+#' @export
+tabtomat <- function(x) {
+  stopifnot(is.matrix(x)|is.data.frame(x))
+  stopifnot(ncol(x)==3)
+  stopifnot(!any(duplicated(paste(x[,1],x[,2]))))
+  da <- sort(unique(x[,1]))
+  su <- sort(unique(x[,2]))
+  res <- matrix(NA,nrow=length(da),ncol=length(su),dimnames=list(da,su))
+  i <- match(x[,1],da)
+  j <- match(x[,2],su)
+  res[cbind(i,j)] <- x[,3]
+  res
+}
