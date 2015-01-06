@@ -41,8 +41,8 @@ putrd <- function(x,desc=abbrev(deparse(substitute(x)),nospace=FALSE),i=idxrd()+
 #newrd
 newrd <- function() {
   system(paste0('mkdir ',rdroot(),'/rd'))
-  putrd("",i=0)
-  
+  x <- NULL
+  putrd(x,i=0)
 }
 #' get
 #'
