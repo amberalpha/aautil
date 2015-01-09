@@ -384,7 +384,7 @@ aatests <- function() {
   system.time(test_file("../aa030pa/tests/aa030patest.R"))
   system.time(test_file("../aa040co/tests/aa040cotest.R")) 
   system.time(test_file("../aa050te/tests/aa050tetest.R")) 
-  #test_file("../aa060ra/tests/aa060ratest.R")
-  #test_file("../aa070fa/tests/aa070fatest.R")
+  system.time(test_file("../aa060ra/tests/aa060ratest.R")) 
+  system.time(test_file("../aa070fa/tests/aa070fatest.R")) 
   #test_file("./tests/aa080titest.R")
 }
