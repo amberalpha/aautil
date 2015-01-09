@@ -1,10 +1,22 @@
-.onLoad <- function(...){options(stringsAsFactors=FALSE)}
+.onLoad <- function(libname, pkgname) {
+  root.global <<- aatopselect("prod")
+  #bui.global <<- buiindir(paste0(root.global,"BDH/RAW/BEST_TARGET_PRICE/TFU")) #somewhat arbitrary?
+  #da.global <<- commonda(patt="CUR_MKT_CAP_TFU.RData")
+  #daw.global <<- as.Date(intersect(as.character(da.global),getca()))
+  #aapaenv <<- environment(x0100BTP_TFU) #this is the package environment - could be done better?
+  #aapafun <<- ls(aapaenv)
+  options("stringsAsFactors"=FALSE)
+}
+
+#.onLoad <- function(...){options(stringsAsFactors=FALSE)}
 
 #rddelim - delimiter between fields in filename
 rddelim <- function(){"_"}
 
 #rdroot - root directory containing rd
-rdroot <- function(){".."}
+#' @export
+rdroot <- function(){root.global}
+#rdroot <- function(){".."}
 
 #abbrev - abbreviate and remove forbidden characters
 abbrev <- function(x,len=30,rep="",patt=list("\\.","/","&","\\*",":"),nospace=TRUE) {
@@ -317,4 +329,62 @@ tabtomat <- function(x) {
   j <- match(x[,2],su)
   res[cbind(i,j)] <- x[,3]
   res
+}
+
+
+#create very top dirs
+#' @export
+aatopcreate <- function() {
+  mkdirn(paste0(rappdirs::user_data_dir(),"\\aabb"))
+  mkdirn(paste0(rappdirs::user_data_dir(),"\\aabb\\test"))
+  mkdirn(paste0(rappdirs::user_data_dir(),"\\aabb\\prod"))
+}
+
+
+
+#create very top dirs
+#' @export
+aatopselect <- function(ver=c("prod","test")) {
+  ver <- match.arg(ver)
+  root.global <<- paste0(rappdirs::user_data_dir(),"\\aabb\\",ver,"\\")
+}
+
+#' @export
+buiindir <- function(dd="../gvs11sector/blra/",test=TRUE,...){
+  cc <- list.files(dd,...)
+  teststring <- ifelse(test,".?EQ\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d\\d.RData",".?.RData")
+  cc1 <-cc[grepl(teststring,cc)]
+  if(test) {
+    unique(substr(cc1,nchar(cc1)-23,nchar(cc1)-6))
+  } else {
+    unique(substr(cc1,1,nchar(cc1)-6))    
+  }
+}
+
+#' @export
+buiindirs <- function(dd=paste0(root.global,"/BDP/key1/",dir(paste0(root.global,"/BDP/key1/")),"/")){ 
+  sort(unique(unlist(lapply(as.list(dd),buiindir)))) 
+}
+
+
+#' unit tests
+#'
+#' @export
+aatests <- function() {
+  require(aautil)
+  aatopselect("test")
+  require(testthat)
+  require(aabd)
+  require(aapa)
+  require(aaco)
+  require(aate)
+  require(aara)
+  require(aafa)
+  system.time(test_file("../aa020bd/tests/aa020bdtest.R"))
+  system.time(test_file("../aa030pa/tests/aa030patest.R"))
+  system.time(test_file("../aa040co/tests/aa040cotest.R")) 
+  system.time(test_file("../aa050te/tests/aa050tetest.R")) 
+  #test_file("../aa060ra/tests/aa060ratest.R")
+  #test_file("../aa070fa/tests/aa070fatest.R")
+  #test_file("./tests/aa080titest.R")
 }

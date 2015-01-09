@@ -12,4 +12,6 @@ Depends:
     data.table,
     snowfall,
     fasttime,
-    zoo
+    zoo,
+    testthat,
+    rappdirs
