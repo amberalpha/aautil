@@ -1,14 +1,8 @@
 .onLoad <- function(libname, pkgname) {
   root.global <<- aatopselect("prod")
-  #bui.global <<- buiindir(paste0(root.global,"BDH/RAW/BEST_TARGET_PRICE/TFU")) #somewhat arbitrary?
-  #da.global <<- commonda(patt="CUR_MKT_CAP_TFU.RData")
-  #daw.global <<- as.Date(intersect(as.character(da.global),getca()))
-  #aapaenv <<- environment(x0100BTP_TFU) #this is the package environment - could be done better?
-  #aapafun <<- ls(aapaenv)
   options("stringsAsFactors"=FALSE)
 }
 
-#.onLoad <- function(...){options(stringsAsFactors=FALSE)}
 
 #rddelim - delimiter between fields in filename
 rddelim <- function(){"_"}
@@ -375,12 +369,13 @@ aatests <- function() {
   aatopselect("test")
   require(testthat)
   require(aabd)
+  system.time(test_file("../aa020bd/tests/aa020bdtest.R"))
+  #newbddir()
   require(aapa)
   require(aaco)
   require(aate)
   require(aara)
   require(aafa)
-  system.time(test_file("../aa020bd/tests/aa020bdtest.R"))
   system.time(test_file("../aa030pa/tests/aa030patest.R"))
   system.time(test_file("../aa040co/tests/aa040cotest.R")) 
   system.time(test_file("../aa050te/tests/aa050tetest.R")) 
