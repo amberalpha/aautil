@@ -1,8 +1,15 @@
+
 .onLoad <- function(libname, pkgname) {
-  root.global <<- aatopselect("prod")
   options("stringsAsFactors"=FALSE)
+  if(!exists("root.global")) aatopselect()
+  derca()
 }
 
+#' @export
+dern <- function(root=root.global,n="001",type=c("BDH","BDP","macro")) {
+  type <- match.arg(type)
+  paste0(root,type,"/derive-",n,"/")
+}
 
 #rddelim - delimiter between fields in filename
 rddelim <- function(){"_"}
@@ -360,7 +367,6 @@ buiindirs <- function(dd=paste0(root.global,"/BDP/key1/",dir(paste0(root.global,
   sort(unique(unlist(lapply(as.list(dd),buiindir)))) 
 }
 
-
 #' unit tests
 #'
 #' @export
@@ -370,7 +376,6 @@ aatests <- function() {
   require(testthat)
   require(aabd)
   system.time(test_file("../aa020bd/tests/aa020bdtest.R"))
-  #newbddir()
   require(aapa)
   require(aaco)
   require(aate)
@@ -383,3 +388,31 @@ aatests <- function() {
   system.time(test_file("../aa070fa/tests/aa070fatest.R")) 
   #test_file("./tests/aa080titest.R")
 }
+
+
+
+
+
+#' @export
+derca <- function(start='1996-01-03',end='2020-12-24',select=3,...) {
+  ca <<- data.table(date=extractDates(seq(from=as.Date(start),to=as.Date(end),by=1),select=select,...),key='date')
+}
+
+#' @export
+offda <- function(x=ca[,max(date)],lags=-20:0) {
+  ca[match(x,date)+lags,date]
+}
+
+#' @export
+dttozoo <- function(dt=cart()[,x:=1:.N],value.var='x') {
+  x <- dcast.data.table(dt[,c('bui','date',value.var),with=FALSE],date ~ bui,value.var=value.var)
+  zoo(as.matrix(x[,-1,with=FALSE]),as.Date(x[,date]))
+}
+
+#' @export
+zootodt <- function(z=dttozoo(),field='x') {
+  rownames(z) <- as.character(index(z))
+  setkey(setcolorder(data.table(mattotab(z,field=field))[,date:=as.Date(date)],c(2,1,3)),bui,date)[]
+}
+
+
