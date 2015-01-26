@@ -38,10 +38,13 @@ abbrev <- function(x,len=30,rep="",patt=list("\\.","/","&","\\*",":"),nospace=TR
 #' @examples
 #' putrd(letters,'my alphabet')
 #putrd
-putrd <- function(x,desc=abbrev(deparse(substitute(x)),nospace=FALSE),i=idxrd()+1) {
+putrd <- function(x,desc=deparse(substitute(x),nospace=FALSE),i=idxrd()+1) {
   n <- formatC(i, width = 5, format = "d", flag = "0")
-  fnam <- paste(c(n,as.character(as.Date(Sys.time())),desc),collapse=rddelim())
+  fnam <- paste(c(n,as.character(as.Date(Sys.time())),abbrev(desc)),collapse=rddelim())
+  i0 <- idxrd()
   save(x,file=paste0(rdroot(),"/rd/",fnam,".RData"))
+  i1 <- idxrd()
+  ifelse(i1==i0+1,i1,NA)
 }
 #' new
 #'
@@ -377,6 +380,7 @@ aatests <- function() {
   require(aabd)
   system.time(test_file("../aa020bd/tests/aa020bdtest.R"))
   require(aapa)
+  aapa::.global()
   require(aaco)
   require(aate)
   require(aara)
@@ -416,3 +420,142 @@ zootodt <- function(z=dttozoo(),field='x') {
 }
 
 
+#' @export
+mattotab <- function(x,field="field",fieldmode="numeric",rclabel=c("date","bui")) 
+{
+  stopifnot(!is.null(rownames(x)) && all(!duplicated(rownames(x))))
+  stopifnot(!is.null(colnames(x)) && all(!duplicated(colnames(x))))
+  #if(fieldmode!=mode(x)) print("changing mode in mattotab()")
+  da <- rownames(x) 
+  su <- colnames(x) 
+  ij <- as.matrix(expand.grid(lapply(list(date=da,bui=su),seq)))
+  res <- data.frame(cbind(   
+    date=da[ij[,1]], 
+    bui=su[ij[,2]],
+    field=as.matrix(x)[as.matrix(ij)]
+  ))
+  colnames(res) <- c(rclabel,field)
+  res[,3] <- as(res[,3],fieldmode)
+  res
+}
+
+#' @export
+retxts <- function(x,...)
+{
+  diff(x)/lag(x)  #recall that for xts lag(x,k=1) moves older->newer ie feasible
+}
+
+#focb - first observation carry back
+#' @export
+focb.mat <- function(
+  #class  NULL    freq    repeats 
+  x,      #mat    yes     -       yes     
+  maxperiods=Inf
+)
+{
+  if(nrow(x)<1) return(x)
+  if(!any(is.na(x))) return(x)
+  y <- x[nrow(x):1,,drop=FALSE]
+  locf.local(y,maxperiods=maxperiods)[nrow(x):1,,drop=FALSE]
+}
+
+#locf - last observation carry forward, adapted from 'its' lib
+#' @export
+locf.local <- function(
+  x,   
+  maxperiods=Inf,
+  ...
+)
+{
+  if(nrow(x)<1) return(x)
+  if(!any(is.na(x))) return(x)
+  y <- x
+  jna <- which(apply(is.na(x),2,any))
+  for(j in jna)
+  {
+    i <- 1:nrow(y)-pmin((1:nrow(y))-most.recent.local(!is.na(y[,j])),maxperiods)
+    suppressWarnings(y[,j] <- y[i,j])   #the warning arises from one:many mapping
+    stopifnot(!any(duplicated(index(y))))   #check that y has no repeats, ie warning was not relevant
+  }
+  return(y)
+}
+
+#
+#' @export
+most.recent.local <- function(x) 
+{
+  if (!is.logical(x)) stop("x must be logical")
+  x.pos <- which(x)
+  if (length(x.pos)==0 || x.pos[1] != 1) x.pos <- c(1, x.pos)
+  rep(x.pos, c(diff(x.pos), length(x) - x.pos[length(x.pos)] + 1))
+}
+
+#' @export
+psz<-paste0
+
+#' @export
+newcon<-function(){DBcon<<-NULL}
+
+
+#' @export
+zoolist <- function(patt="0700",fnam=dir(dern())[grep(patt,dir(dern()))]) {
+  mnem<-vector("list")
+  for(i in 1:length(fnam)) mnem[i] <- strsplit(fnam[i],split="\\.")[[1]][1]
+  x<-lapply(mnem,getstep)
+  names(x) <- mnem
+  x
+}
+
+#' @export
+dtlist <- function(...) {
+  x <- zoolist(...)
+  dt1 <- lapply(lapply(x,zootodt),setkeyv,c('bui','date'))
+  for(i in 1:length(dt1)) {setnames(dt1[[i]],old='x',new=names(dt1[i]))}
+  dt1
+}
+
+#' @export
+combokey0 <- function(x=zoolist(),fun=c("union","intersect"),ij=c('rownames','colnames')) {
+  ij <- match.arg(ij)
+  setnames(data.table(sort(Reduce(match.arg(fun), lapply(x,get(ij)))),key='V1'),ifelse(ij=='rownames','date','bui'))[]
+}
+#' @export
+combokey <- function(...,drop="VIX") {
+  x <- combokey0(...)
+  if(identical(colnames(x),"date")) x[[1]] <- as.Date(x[[1]])
+  x[!(unlist(x[,1,with=FALSE])%in%drop)]
+}
+#' @export
+buidate <- function(bui=combokey(ij='col'),da=combokey(ij='row')[ca]) {
+  expand.grid(unique(unlist(bui)),as.Date(unique(unlist(da))))
+}
+
+#' @export
+cart <- function(bui=combokey(ij='col'),da=xda(1)) {
+  setkey(setnames(data.table(expand.grid(bui[,bui],da[,date],stringsAsFactors=FALSE)),c('bui','date')),bui,date)[]
+}
+
+#' @export
+xda <- function(extend=10,da=combokey()) {
+  unique(rbindlist(list(da,data.table(offda(da[,max(date)],0:extend)))))
+}
+
+#' @export
+mergedt <- function(x=dtlist(),initial=cart()) {
+  Reduce(f=function(x,y) merge(x,y,all=TRUE),x=x)
+}
+
+#rows with no na
+#' @export
+nonadt <- function(x=mergedt()) {
+  x[x[,all(!is.na(.SD)),key(x)][V1==TRUE]][,V1:=NULL][]
+}
+
+#' @export
+nonasu <- function(x=nonadt(),nda=x[,length(unique(date))],nbui=x[,length(unique(bui))]) {
+  dtot <- unique(x[,list(date)])
+  cart(bui=unique(x[,list(bui)])[1:nbui],da=dtot[(nrow(dtot)-(nda-1)):nrow(dtot)])[!is.na(bui)&!is.na(date)]
+}
+
+#' @export
+`sfLapplyWrap` <- function(X,FUN,...){sfLapply(x=X,fun=FUN,...)}
