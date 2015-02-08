@@ -559,3 +559,9 @@ nonasu <- function(x=nonadt(),nda=x[,length(unique(date))],nbui=x[,length(unique
 
 #' @export
 `sfLapplyWrap` <- function(X,FUN,...){sfLapply(x=X,fun=FUN,...)}
+
+#mkdirn - make one directory
+#' @export
+mkdirn <- function(dd) {
+  if(all(is.na(file.info(dd))))  suppressWarnings(system(paste0("mkdir ",dd)))
+}
