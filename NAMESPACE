@@ -3,6 +3,7 @@
 export(aatests)
 export(aatopcreate)
 export(aatopselect)
+export(abbrev)
 export(buidate)
 export(buiindir)
 export(buiindirs)
