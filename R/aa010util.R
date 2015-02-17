@@ -39,13 +39,17 @@ abbrev <- function(x,len=30,rep="",patt=list("\\.","/","&","\\*",":"),nospace=TR
 #' @examples
 #' putrd(letters,'my alphabet')
 #putrd
-putrd <- function(x,desc=deparse(substitute(x),nospace=FALSE),i=idxrd()+1) {
+putrd <- function(x,desc=deparse(substitute(x)),i=idxrd()+1) {
   n <- formatC(i, width = 5, format = "d", flag = "0")
   fnam <- paste(c(n,as.character(as.Date(Sys.time())),abbrev(desc)),collapse=rddelim())
-  i0 <- idxrd()
-  save(x,file=paste0(rdroot(),"/rd/",fnam,".RData"))
-  i1 <- idxrd()
-  ifelse(i1==i0+1,i1,NA)
+  if(i==0) {
+    save(x,file=paste0(rdroot(),"/rd/",fnam,".RData"))
+  } else {
+    i0 <- idxrd()
+    save(x,file=paste0(rdroot(),"/rd/",fnam,".RData"))
+    i1 <- idxrd()
+    ifelse(i1==i0+1,i1,NA)
+  }
 }
 #' new
 #'
@@ -59,7 +63,7 @@ putrd <- function(x,desc=deparse(substitute(x),nospace=FALSE),i=idxrd()+1) {
 newrd <- function() {
   system(paste0('mkdir ',rdroot(),'/rd'))
   x <- NULL
-  putrd(x,i=0)
+  putrd(x,'init',i=0)
 }
 #' get
 #'
