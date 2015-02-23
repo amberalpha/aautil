@@ -566,3 +566,29 @@ nonasu <- function(x=nonadt(),nda=x[,length(unique(date))],nbui=x[,length(unique
 mkdirn <- function(dd) {
   if(all(is.na(file.info(dd))))  suppressWarnings(system(paste0("mkdir ",dd)))
 }
+
+#aacol1 - color scale, for interpolating qualitative scale 'Set2' which can only have n<=8
+#' @export
+aacol1 <- function(m=k,k=6,nbrew=8,name="Set2") {
+  require(RColorBrewer)
+  c0 <- brewer.pal(n=nbrew,name=name)[1:k]
+  oversample <- (k<m)
+  if(oversample) {
+    n <- max(m,60)
+    x1 <- (k-1)*((1:n)/n)
+    i <- ceiling(x1-as.numeric(options("ts.eps")))
+    c1 <- c0[i]
+    c2 <- c0[i+1]
+    cc <- rep(NA,n)
+    for(j in seq_along(i)) {
+      ii <- which(i==i[j])
+      cc[ii] <- colorRampPalette(colors=c(unique(c1[ii]),unique(c2[ii])),space="Lab")(length(ii))
+    }
+    im <- round(seq(from=1/n,to=1,length=m)*n)
+  } else {
+    cc <- c0
+    im <- 1:m
+  }
+  cc[im]
+}
+#testaacol <- function(...){plot.new();par(mfcol=c(4,4));for(i in 1:15){barplot(1:i,col=aacol1(i,...),border=NA,space=0)}}
