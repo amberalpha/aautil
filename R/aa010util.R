@@ -596,3 +596,108 @@ aacol1 <- function(m=k,k=6,nbrew=8,name="Set2") {
   cc[im]
 }
 #testaacol <- function(...){plot.new();par(mfcol=c(4,4));for(i in 1:15){barplot(1:i,col=aacol1(i,...),border=NA,space=0)}}
+
+#bdp1con
+#' @export
+bdp1con <- function() {  #fields only
+  data.table(data.frame(field=c("CRNCY_ADJ_MKT_CAP","BICS_LEVEL_3_NAME","BICS_LEVEL_CODE_ASSIGNED","BICS_LEVEL_NAME_ASSIGNED",
+                                "CIE_DES","CNTRY_ISSUE_ISO","COMPANY_WEB_ADDRESS","COUNTRY_FULL_NAME","CRNCY",
+                                "CUR_MKT_CAP","EQY_PRIM_EXCH","ICB_SUBSECTOR_NAME","INDUSTRY_SUBGROUP","NAME","REGION_OF_LARGEST_REVENUE",
+                                "TICKER_AND_EXCH_CODE","ICB_SUBSECTOR_NUM"),
+                        override_fields="EQY_FUND_CRNCY", # these do not mess up the others
+                        override_values="USD"
+  ),key='field')
+}
+
+#bdp2con
+#' @export
+bdp2con <- function() {  #fields only
+  data.table(data.frame(field=c("BICS_REVENUE_%_LEVEL_ASSIGNED")))
+}
+
+#' Paths to reference data directory tree
+#'
+#' Generates paths for directory creation
+#' @param flds data.table with fields 'field' and 'subdir' - can be generated with bdp1con
+#' @keywords directory
+#' @export
+#' @examples
+#' bdp1dir()
+bdp1dir <- function(flds=bdp1con()) {
+  x <- paste0("BDP/key1/",flds[,field])
+  x[order(nchar(x))]
+}  
+
+#' Paths to BICS data directory tree
+#'
+#' Generates paths for directory creation
+#' @param flds data.table with fields 'field' and 'subdir' - can be generated with bdp2con
+#' @keywords directory
+#' @export
+#' @examples
+#' bdp2dir()
+
+bdp2dir <- function(flds=bdp2con()) {
+  x <- paste0("BDP/key2/",flds[,field])
+  x[order(nchar(x))]
+}  
+#*con----ends
+
+
+#' resample for devol
+#'
+#' part 1 : rescale values to 'rolling quantile' ie the quantile of the last observation in a trailing window
+#' @param x normally volatility
+#' @param n number of quantiles, defaults to quintiles
+#' @param start no output until this index
+#' @param maxwin the window expands until it is this length, then rolls
+#' @examples
+#' vix <- bdh(conn,paste0("vix index"),"px_last","20060101","20150227")
+#' lastqtile(vix[,2])
+#' @export
+lastqtile <- function(x,n=5,start=2*n,maxwin=200*n) {
+  if(is.zoo(x)) x <- coredata(x)
+  res <- x*NA
+  for(i in seq(from=start,to=length(x),by=1)) {
+    i1 <- max(1,i-maxwin):i
+    xx <- x[i1][!is.na(x[i1])]
+    ii <- length(xx)
+    if(n<length(xx)) res[i] <- ceiling(n*rank(xx)[ii]/ii)
+  }
+  res
+}
+
+#' resample for devol
+#'
+#' part 2 : resample so equal amount 'flows' in each period
+#' @param volq volatility quantile, defaults to quantil
+#' @param n quantity of volq before a new sample taken, default 5
+#' @examples
+#' x <- bdh(conn,paste0("vix index"),"px_last","20060101","20150227")
+#' vix <- zoo(x[,2],as.Date(x[,1]))
+#' vixquantile <- zoo(lastqtile(x[,2]),as.Date(x[,1]))
+#' i <- resvol(vixquantile,5)
+#' par(mfrow=c(2,1))
+#' plot(vix[i])
+#' plot(coredata(vix[i]),type='l')
+#' par(mfrow=c(1,1))
+#' @export
+resvol <- function(volq,n=5) {
+  i1 <- 1
+  i2 <- 1
+  sumvol <- 0
+  dd <- index(volq)
+  dseq <- dd[1]
+  dseq[i1] <- as.Date(dd[i1])
+  while(i1<length(dd)) {
+    while(sumvol<n & i1<length(dd)) {
+      sumvol <- sumvol+ifelse(is.na(volq[i1]),0,volq[i1])
+      i1 <- i1+1
+    }
+    sumvol <- 0
+    i2 <- i2+1
+    dseq[i2] <- dd[i1]
+    print(paste(i1,i2))
+  }
+  dseq
+}
