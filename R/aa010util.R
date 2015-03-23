@@ -715,3 +715,68 @@ commonda <- function(joinfun=intersect,nn="000",patt=".?") {
   #lapply(lapply(lapply(as.list(paste0(dd,dir(dd))),load),assign,value=x),function(x){length(index(x))})
   as.Date(Reduce(joinfun,ll[0<lapply(ll,length)]))
 }
+
+# turn - median daily value
+turn <- function(iday = 1:5, nweek = 26) {
+  x <- getbdh("PX_VOLUME_TFU") * getbdh("EQY_WEIGHTED_AVG_PX_TFU")
+  dates <- index(x)
+  weekday <- dates[as.POSIXlt(dates)$wday %in% iday]
+  xi <- coredata(x[weekday])
+  xi[is.na(xi)] <- 0
+  zi <- zoo(xi, index(x[weekday]))
+  rollapplyr(zi, FUN = median, width = length(iday) * nweek, partial = TRUE)
+}
+
+# tradefrac - fraction of days traded
+tradefrac <- function(iday = 1:5, nweek = 26) {
+  x <- getbdh("PX_VOLUME_TFU") * getbdh("EQY_WEIGHTED_AVG_PX_TFU")
+  dates <- index(x)
+  weekday <- dates[as.POSIXlt(dates)$wday %in% iday]
+  xi <- coredata(x[weekday])
+  xi[!is.na(xi) & (0 < xi)] <- 1
+  xi[is.na(xi)] <- 0
+  zi <- zoo(xi, index(x[weekday]))
+  rollapplyr(zi, FUN = mean, width = length(iday) * nweek, partial = TRUE)
+}
+
+# valuenday - value transacted n days, total
+valuenday <- function(iday = 1:5, nweek = 26, ndays = 20) {
+  x <- getbdh("PX_VOLUME_TFU") * getbdh("EQY_WEIGHTED_AVG_PX_TFU")
+  dates <- index(x)
+  weekday <- dates[as.POSIXlt(dates)$wday %in% iday]
+  xi <- coredata(x[weekday])
+  xi[is.na(xi)] <- 0
+  zi <- zoo(xi, index(x[weekday]))
+  z1 <- rollapplyr(zi, FUN = sum, width = ndays, partial = TRUE)
+  rollapplyr(z1, FUN = median, width = length(iday) * nweek, partial = TRUE)
+}
+
+# freemcap - free float market cap
+freemcap <- function(iday = 1:5, nweek = 26) {
+  ff <- getbdh("EQY_FREE_FLOAT_PCT_TFU")/100
+  for (j in 1:ncol(ff)) {
+    if (all(is.na(ff[, j]))) {
+      print(j)
+      ff[, j] <- 1
+    }
+  }
+  x <- getbdh("CUR_MKT_CAP_TFU") * ff
+  dates <- index(x)
+  weekday <- dates[as.POSIXlt(dates)$wday %in% iday]
+  xi <- coredata(x[weekday])
+  zi <- zoo(xi, index(x[weekday]))
+  rollapplyr(zi, FUN = mean, width = length(iday) * nweek, na.rm = TRUE, partial = TRUE)
+}
+
+
+#zeroprepend
+
+#' @export
+zeroprepend <- function(x,ntotal) {
+  x <- as.character(x)
+  stopifnot(all(nchar(x)<=ntotal)) #otherwise x is right-truncated
+  z <- paste(rep("0",ntotal),collapse="")
+  zz <- rep(z,length(x))
+  substr(zz,1+nchar(zz)-nchar(x), nchar(zz)) <- x
+  zz
+}
