@@ -50,6 +50,24 @@ putrd <- function(x, desc = deparse(substitute(x)), i = idxrd() + 1) {
         ifelse(i1 == i0 + 1, i1, NA)
     }
 }
+
+#' descrd
+#'
+#' directory entry for index i
+#' @export
+#' @examples
+#' descrd()
+#' @param i index number, defaults to last
+#' @export
+#' @examples
+#' \dontrun{
+#' descrd()
+#' }
+descrd <- function(i=idxrd()) {
+  dirrd()[formatC(i, width = 5, format = "d", flag = "0")]
+}
+
+
 #' new
 #'
 #' create the directory
@@ -57,6 +75,47 @@ putrd <- function(x, desc = deparse(substitute(x)), i = idxrd() + 1) {
 #' @export
 #' @examples
 #' newrd()
+
+#' put with structured description
+#'
+#' save an object with app, type, version in description
+#' @param x object to save
+#' @param app character mnemonic for application
+#' @param type character mnemonic for user-defined 'type' ie description
+#' @param ver numeric version
+#' @param i index number, defaults to next available
+#' @keywords data
+#' @export
+#' @examples
+#' \dontrun{
+#' putrdatv(letters,app='myapp',type='testdata',ver=1)
+#' getrdatv(app='myapp',type='testdata',ver=1)
+#' }
+putrdatv <- function(x,app='s6',type=deparse(substitute(x)),ver=1,i = idxrd() + 1) {
+  putrd(x,desc=paste0('app',app,'type',type,'ver',ver),i=i)
+}
+#' get using structured description
+#'
+#' save an object with app, type, version in description
+#' @param x object to save
+#' @param app character mnemonic for application
+#' @param type character mnemonic for user-defined 'type' ie description
+#' @param ver numeric version
+#' @param i index number, defaults to next available
+#' @keywords data
+#' @export
+#' @examples
+#' \dontrun{
+#' putrdatv(letters,app='myapp',type='testdata',ver=1)
+#' getrdatv(app='myapp',type='testdata',ver=1)
+#' }
+getrdatv <- function(app='s6',type='xbdp',ver=1) {
+  type <- abbrev(type)
+  desc1=paste0('app',app,'type',type,'ver',ver)
+  ird <- greprd(desc1)
+  if(0<length(ird)) getrd(max(ird))
+}
+
 
 # newrd
 newrd <- function() {
@@ -779,4 +838,20 @@ zeroprepend <- function(x,ntotal) {
   zz <- rep(z,length(x))
   substr(zz,1+nchar(zz)-nchar(x), nchar(zz)) <- x
   zz
+}
+
+
+#' @export
+winsoriser <- function(dt = xx, field = "redoto", thresh = 0.001) {
+    pt <- paste0("dt[,quantile(", field, ",", thresh, ",na.rm=TRUE)]")
+    xmin <- dt[, eval(parse(text = pt))]
+    pt <- paste0("dt[,quantile(", field, ",", 1 - thresh, ",na.rm=TRUE)]")
+    xmax <- dt[, eval(parse(text = pt))]
+    pt <- paste0(field, ":=min(max(", field, ",xmin),xmax)")
+    x <- dt[, eval(parse(text = pt)), by = c("bui", "date")]
+}
+
+#' @export
+saferecip <- function(x,eps=sqrt(.Machine$double.eps)) {
+  1/(x+.Machine$double.eps)
 }
