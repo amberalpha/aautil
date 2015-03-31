@@ -855,3 +855,10 @@ winsoriser <- function(dt = xx, field = "redoto", thresh = 0.001) {
 saferecip <- function(x,eps=sqrt(.Machine$double.eps)) {
   1/(x+.Machine$double.eps)
 }
+
+#' @export
+mz <-
+  function(x) {
+    stopifnot(is(as.Date(rownames(x)),"Date"))
+    zoo(x,order.by=as.Date(rownames(x)))
+  }
