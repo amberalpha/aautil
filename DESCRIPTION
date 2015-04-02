@@ -15,4 +15,5 @@ Depends:
     zoo,
     testthat,
     rappdirs,
-    RColorBrewer
+    RColorBrewer,
+    devtools

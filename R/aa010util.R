@@ -765,14 +765,17 @@ resvol <- function(volq, n = 5) {
 commonda <- function(joinfun=intersect,nn="000",patt=".?") {
   dd0 <- paste0(root.global,"BDH/derive-",nn,"/")
   dd <- dir(dd0)[grepl(patt,dir(dd0))]
-  pp <- paste0(dd0,dd)
-  ll <- vector("list",length(dd))
-  for(i in seq_along(pp)) {
-    load(pp[i])
-    ll[[i]] <- index(x)
+  if(0==length(dd)) { return(NA) #unsatisfactory
+  } else {
+    pp <- paste0(dd0,dd)
+    ll <- vector("list",length(dd))
+    for(i in seq_along(pp)) {
+      load(pp[i])
+      ll[[i]] <- index(x)
+    }
+    #lapply(lapply(lapply(as.list(paste0(dd,dir(dd))),load),assign,value=x),function(x){length(index(x))})
+    as.Date(Reduce(joinfun,ll[0<lapply(ll,length)]))
   }
-  #lapply(lapply(lapply(as.list(paste0(dd,dir(dd))),load),assign,value=x),function(x){length(index(x))})
-  as.Date(Reduce(joinfun,ll[0<lapply(ll,length)]))
 }
 
 # turn - median daily value
