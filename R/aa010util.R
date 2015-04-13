@@ -843,6 +843,21 @@ zeroprepend <- function(x,ntotal) {
   zz
 }
 
+#' @export
+winsorise <- function (x, minval = quantile(x = x, probs = probs[1], na.rm = na.rm), 
+          maxval = quantile(x = x, probs = probs[2], na.rm = na.rm), 
+          probs = c(0.05, 0.95), na.rm = FALSE) {
+  pmax(pmin(x, maxval), minval)
+}
+
+#mynorm - preserves rankings, places on a normal distribution of same [from 00lib]
+#' @export
+mynorm <- function(x,sdv=sd(as.numeric(x),na.rm=TRUE),meanarg=mean(x,na.rm=TRUE))
+{
+  qnorm(p=rank(x,na.last='keep')/(1+sum(!is.na(x))),sd=sdv,mean=meanarg)
+}
+
+
 
 #' @export
 winsoriser <- function(dt = xx, field = "redoto", thresh = 0.001) {
