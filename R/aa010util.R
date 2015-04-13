@@ -865,3 +865,11 @@ mz <-
     stopifnot(is(as.Date(rownames(x)),"Date"))
     zoo(x,order.by=as.Date(rownames(x)))
   }
+
+#' @export
+ncpus <- function(
+  nsplit=3 #number of separate entire tasks
+)
+{
+  max(as.numeric(strsplit(shell("wmic cpu get NumberOfCores,NumberOfLogicalProcessors",intern=TRUE)," ")[[2]]),na.rm=T)
+}
