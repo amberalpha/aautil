@@ -110,10 +110,26 @@ putrdatv <- function(x,app='s6',type=deparse(substitute(x)),ver=1,i = idxrd() + 
 #' getrdatv(app='myapp',type='testdata',ver=1)
 #' }
 getrdatv <- function(app='s6',type='xbdp',ver=1) {
-  type <- abbrev(type)
-  desc1=paste0('app',app,'type',type,'ver',ver)
-  ird <- greprd(desc1)
+  ird <- greprdatv(app,type,ver)
   if(0<length(ird)) getrd(max(ird))
+}
+
+
+#' grep existing entry with structured description
+#'
+#' grep for an object with app, type, version in description
+#' @param app character mnemonic for application
+#' @param type character mnemonic for user-defined 'type' ie description
+#' @param ver numeric version
+#' @keywords data
+#' @export
+#' @examples
+#' \dontrun{
+#' putrdatv(letters,app='myapp',type='testdata',ver=1)
+#' greprdatv(app='myapp',type='testdata',ver=1)
+#' }
+greprdatv <- function(app='s6',type='xbdp',ver=1) {
+  greprd(paste0('app',app,'type',abbrev(type),'ver',ver))
 }
 
 
