@@ -68,13 +68,6 @@ descrd <- function(i=idxrd()) {
 }
 
 
-#' new
-#'
-#' create the directory
-#' @keywords data
-#' @export
-#' @examples
-#' newrd()
 
 #' put with structured description
 #'
@@ -133,7 +126,15 @@ greprdatv <- function(app='s6',type='xbdp',ver=1) {
 }
 
 
-# newrd
+#' new
+#'
+#' create the directory
+#' @keywords data
+#' @export
+#' @examples
+#' \dontrun{
+#' newrd()
+#' }
 newrd <- function() {
     system(paste0("mkdir ", rdroot(), "/rd"))
     x <- NULL
@@ -195,11 +196,14 @@ idxrd <- function() {
 #' delrd()
 # delrd
 delrd <- function(i = idxrd()) {
-    if (i == 0) 
+    if (length(i)==1 && i == 0) 
         return()
-    n <- formatC(i, width = 5, format = "d", flag = "0")
-    fnam <- paste0(paste0(dirrd()[n], collapse = rddelim()), ".RData")
-    system(paste0("rm \"", paste0(rdroot(), "/rd/", fnam, "\"")))
+    i <- intersect(i,dirrd()[,as.numeric(num)])
+    for(j in seq_along(i)) {
+      n <- formatC(i[j], width = 5, format = "d", flag = "0")
+      fnam <- paste0(paste0(dirrd()[n], collapse = rddelim()), ".RData")
+      system(paste0("rm \"", paste0(rdroot(), "/rd/", fnam, "\"")))
+    }
 }
 
 #' grep
