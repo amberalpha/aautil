@@ -275,7 +275,9 @@ meantri <- function(x, minweight = (1/3), pow = 1, ...) {
 #' @export
 rollxts <- function(x, what = "max", n = 5, ...) {
     # rollapply(data=x,width=n,FUN=get(what),na.rm=TRUE,fill=NA,align='right',...)
-    rollapply(data = x, width = n, FUN = get(what), na.rm = TRUE, na.pad = TRUE, align = "right", ...)  #changed to deprecated alternative as workaround for bug in deraats 2013-12-31
+    x1 <- rollapply(data = x, width = n, FUN = get(what), na.rm = TRUE, na.pad = TRUE, align = "right", ...)  #changed to deprecated alternative as workaround for bug in deraats 2013-12-31
+    rownames(x1) <- as.character(index(x1))
+    x1
 }
 
 
@@ -519,7 +521,17 @@ mattotab <- function(x, field = "field", fieldmode = "numeric", rclabel = c("dat
 
 #' @export
 retxts <- function(x, ...) {
-    diff(x)/lag(x)  #recall that for xts lag(x,k=1) moves older->newer ie feasible
+    #x1 <- diff(x)/lag(x)  #recall that for xts lag(x,k=1) moves older->newer ie feasible
+    #rownames(x1) <- as.character(index(x))  #this does not work, xts has null rownames
+    #x1
+    diff(x)/lag(x)    #recall that for xts lag(x,k=1) moves older->newer ie feasible
+}
+
+#' @export
+xz <- function(x) {
+  x1 <- as.zoo(x)
+  rownames(x1) <- as.character(index(x1))
+  x1
 }
 
 # focb - first observation carry back
