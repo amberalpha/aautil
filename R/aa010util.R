@@ -805,9 +805,43 @@ commonda <- function(joinfun=intersect,nn="000",patt=".?") {
       load(pp[i])
       ll[[i]] <- index(x)
     }
-    #lapply(lapply(lapply(as.list(paste0(dd,dir(dd))),load),assign,value=x),function(x){length(index(x))})
-    as.Date(Reduce(joinfun,ll[0<lapply(ll,length)]))
+    bar <- Reduce(joinfun,ll[0<lapply(ll,length)]) #no idea why needed
+    as.Date(bar)
   }
+}
+
+#commonbuida - applies joinfun to derive-000 directory contents
+#' @export
+commonbuida <- function(joinfun=intersect,nn="000",patt=".?_....RData") {
+  dd0 <- paste0(root.global,"BDH/derive-",nn,"/")
+  dd <- dir(dd0)[grepl(patt,dir(dd0))]
+  if(0==length(dd)) { return(NA) #unsatisfactory
+  } else {
+    pp <- paste0(dd0,dd)
+    da <- vector("list",length(dd))
+    bui <- vector("list",length(dd))
+    for(i in seq_along(pp)) {
+      load(pp[i])
+      da[[i]] <- index(x)
+      bui[[i]] <- colnames(x)
+    }
+    allda <- Reduce(joinfun,da[0<lapply(da,length)])
+    allbui <- Reduce(joinfun,bui[0<lapply(bui,length)])
+    x <- as.Date(allda,origin = "1970-01-01") #no idea why origin is needed here
+    list(da=x,bui=allbui)
+  }
+}
+
+#putbuida
+#' @export
+putbuida <- function(x=commonbuida()) {
+  putrdatv(x,"jo","buida")
+}
+
+#getbuida
+#' @export
+getbuida <- function(...) {
+  getrdatv("jo","buida",...)
 }
 
 # turn - median daily value
