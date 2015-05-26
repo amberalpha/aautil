@@ -38,7 +38,8 @@ abbrev <- function(x, len = 30, rep = "", patt = list("\\.", "/", "&", "\\*", ":
 #' @examples
 #' putrd(letters,'my alphabet')
 # putrd
-putrd <- function(x, desc = deparse(substitute(x)), i = idxrd() + 1) {
+putrd <- function(x, desc = deparse(substitute(x)), i = idxrd() + 1,usedesc=FALSE) {
+    if(usedesc && 'desc'%in%names(attributes(x))) { desc <- attr(x,'desc') }
     n <- formatC(i, width = 5, format = "d", flag = "0")
     fnam <- paste(c(n, as.character(as.Date(Sys.time())), abbrev(desc)), collapse = rddelim())
     if (i == 0) {
@@ -280,6 +281,11 @@ rollxts <- function(x, what = "max", n = 5, ...) {
     x1
 }
 
+#' @export
+notail <- function(x,quant=.05) {
+  x[(quantile(x,prob=quant,na.rm=TRUE)<=x) & (x<=quantile(x,prob=1-quant,na.rm=TRUE))]
+}
+
 
 #' normalisation
 #'
@@ -289,10 +295,11 @@ rollxts <- function(x, what = "max", n = 5, ...) {
 #' @param meanarg mean target
 #' @param final logical flag to return just final point
 #' @export
-mynorm <- function(x, sdv = sd(as.numeric(x), na.rm = TRUE), meanarg = mean(x, na.rm = TRUE), final = FALSE, ...) {
+mynorm <- function(x, sdv = sd(as.numeric(notail(x,quant)), na.rm = TRUE), meanarg = mean(notail(x,quant), na.rm = TRUE), final = FALSE, quant=0., ...) {
     if (sum(!is.na(x)) < 2) 
         return(NA)
     stopifnot(is(x, "numeric"))
+    stopifnot((0<=quant) & (quant<.5))
     res <- qnorm(p = rank(x, na.last = "keep")/(1 + sum(!is.na(x))), sd = sdv, mean = meanarg)
     if (final) {
         res[length(res)]
@@ -916,12 +923,13 @@ winsorise <- function (x, minval = quantile(x = x, probs = probs[1], na.rm = na.
   pmax(pmin(x, maxval), minval)
 }
 
-#mynorm - preserves rankings, places on a normal distribution of same [from 00lib]
-#' @export
-mynorm <- function(x,sdv=sd(as.numeric(x),na.rm=TRUE),meanarg=mean(x,na.rm=TRUE))
-{
-  qnorm(p=rank(x,na.last='keep')/(1+sum(!is.na(x))),sd=sdv,mean=meanarg)
-}
+#this is a duplicate of a more sophisticated version found in this library
+# #mynorm - preserves rankings, places on a normal distribution of same [from 00lib]
+# #' @export
+# mynorm <- function(x,sdv=sd(as.numeric(x),na.rm=TRUE),meanarg=mean(x,na.rm=TRUE))
+# {
+#   qnorm(p=rank(x,na.last='keep')/(1+sum(!is.na(x))),sd=sdv,mean=meanarg)
+# }
 
 
 
