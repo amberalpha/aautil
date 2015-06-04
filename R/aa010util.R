@@ -176,6 +176,12 @@ dirrd <- function() {
     setkeyv(data.table(data.frame(num = num, dat = dat, des = des)), "num")[]
 }
 
+#' @export
+dd <- function() {
+  x <- edit(dirrd())
+}
+
+
 #' index
 #'
 #' index of repo
