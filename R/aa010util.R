@@ -13,7 +13,6 @@ rddelim <- function() {
 # rdroot - root directory containing rd
 #' @export
 rdroot <- function() {
-  print(root.global)
     root.global
 }
 # rdroot <- function(){'..'}
@@ -1011,6 +1010,29 @@ getbdp <- function(mydir = dern(n = "000", typ = "BDP"), mnem = bdp1con()[, fiel
   dt
 }
 
-
+#what is this?
 #' @export
 xpkg <- function(x) {x[,bui]}
+
+
+#' @export
+imgzoo <- function(z,                 #zoo
+                     orderby=NULL,...)       #how to reorder columns
+{
+  stopifnot(is(z,"zoo"))
+  if (is.null(orderby)) {
+    if (any(is.na(z))) 
+      orderby <- is.na(z)
+    else if (mode(z) == "character") 
+      orderby <- z == "0"
+    else orderby <- z == 0
+  }
+  zz <- as.matrix(z)
+  mode(zz) <- "numeric"
+  jorder <- suppressWarnings(order(unlist(lapply(lapply(data.frame(!orderby),which),min)), #first value where orderby is not true
+                                   unlist(lapply(lapply(data.frame(orderby),which),min)),  #first value where orderby is true
+                                   as.numeric(unlist(lapply(lapply(data.frame(!orderby[(rev(seq(along=orderby[,1,drop=FALSE]))),,drop=FALSE]),which),min)))*-1 #first value from end where orderby is true
+  ))
+  zzz <- t(zz[,jorder])[,nrow(zz):1]
+  image(zzz,xlab="bui",ylab="date",axes=FALSE,...)
+}
