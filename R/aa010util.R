@@ -5,6 +5,7 @@ dern <- function(root = root.global, n = "001", type = c("BDH", "BDP", "macro"))
     paste0(root, type, "/derive-", n, "/")
 }
 
+
 # rddelim - delimiter between fields in filename
 rddelim <- function() {
     "_"
@@ -15,8 +16,13 @@ rddelim <- function() {
 rdroot <- function() {
     root.global
 }
+<<<<<<< HEAD
 # rdroot <- function(){'..'}
  
+=======
+
+
+>>>>>>> 9432d70fd4bd8ff66fccde8e21216b0957adbb01
 # abbrev - abbreviate and remove forbidden characters
 #' @export
 abbrev <- function(x, len = 30, rep = "", patt = list("\\.", "/", "&", "\\*", ":"), nospace = TRUE) {
