@@ -15,7 +15,6 @@ rddelim <- function() {
 rdroot <- function() {
     root.global
 }
-# rdroot <- function(){'..'}
 
 # abbrev - abbreviate and remove forbidden characters
 #' @export
