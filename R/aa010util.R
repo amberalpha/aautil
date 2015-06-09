@@ -77,7 +77,8 @@ descrd <- function(i=idxrd()) {
 #' @param app character mnemonic for application
 #' @param type character mnemonic for user-defined 'type' ie description
 #' @param ver numeric version
-#' @param i index number, defaults to next available
+#' @param i index number, defaults to next available if over=FALSE
+#' @param over logical flag to override i and overwrite last existing entry, default is TRUE
 #' @keywords data
 #' @export
 #' @examples
@@ -85,7 +86,12 @@ descrd <- function(i=idxrd()) {
 #' putrdatv(letters,app='myapp',type='testdata',ver=1)
 #' getrdatv(app='myapp',type='testdata',ver=1)
 #' }
-putrdatv <- function(x,app='s6',type=deparse(substitute(x)),ver=1,i = idxrd() + 1) {
+putrdatv <- function(x,app=getv()$app,type=getv()$type,ver=getv()$ver,i = idxrd() + 1,over=TRUE) {
+  ii <- greprdatv(app=app,typ=type,ver=ver)
+  if((0<length(ii)) & over) {
+    i <- max(ii)
+    delrd(i=ii)
+  }
   putrd(x,desc=paste0('app',app,'type',type,'ver',ver),i=i)
 }
 #' get using structured description
@@ -103,9 +109,10 @@ putrdatv <- function(x,app='s6',type=deparse(substitute(x)),ver=1,i = idxrd() + 
 #' putrdatv(letters,app='myapp',type='testdata',ver=1)
 #' getrdatv(app='myapp',type='testdata',ver=1)
 #' }
-getrdatv <- function(app='s6',type='xbdp',ver=1) {
+getrdatv <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) {
   ird <- greprdatv(app,type,ver)
-  if(0<length(ird)) getrd(max(ird))
+  if(0==length(ird)) return()
+  getrd(max(ird))
 }
 
 
@@ -122,8 +129,47 @@ getrdatv <- function(app='s6',type='xbdp',ver=1) {
 #' putrdatv(letters,app='myapp',type='testdata',ver=1)
 #' greprdatv(app='myapp',type='testdata',ver=1)
 #' }
-greprdatv <- function(app='s6',type='xbdp',ver=1) {
-  greprd(paste0('app',app,'type',abbrev(type),'ver',ver))
+greprdatv <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) {
+  dd <- dirrd()
+  dd[grepl(descrdatv(app,type,ver), dirrd()[, des]), as.numeric(num)]
+}
+
+#' structured description
+#'
+#' paste up description from mnemonics
+#' @param app character mnemonic for application
+#' @param type character mnemonic for user-defined 'type' ie description
+#' @param ver numeric version
+#' @keywords data
+#' @export
+descrdatv <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) {
+  paste0('app',app,'type',abbrev(type),'ver',ver)
+}
+
+#' @export
+ddv <- function() {
+    dd <- dirrd()
+    dd[grep('^app.+type.+ver.+',des)]
+}
+
+
+
+#' put version number
+#'
+#' @param n number
+#' @keywords data
+#' @export
+putv <- function(app="jo",type="x",ver=1) {
+  ver.g <<- list(app=app,type=type,ver=ver)
+}
+
+#' get version number
+#'
+#' @keywords data
+#' @export
+getv <- function() {
+  if(!exists("ver.g",envir=globalenv())) return(list(app="jo",type='x',ver=0))
+  eval(expression(ver.g),envir=globalenv())
 }
 
 
@@ -175,6 +221,8 @@ dirrd <- function() {
     setkeyv(data.table(data.frame(num = num, dat = dat, des = des)), "num")[]
 }
 
+
+  
 #' @export
 dd <- function() {
   x <- edit(dirrd())
@@ -190,7 +238,8 @@ dd <- function() {
 #' idxrd()
 # idxrd - get final index
 idxrd <- function() {
-    ifelse(length(dirrd()), as.numeric(max(dirrd()[, num])), 0)
+  dd <- dirrd()
+  ifelse(length(dd), as.numeric(max(dd[, num])), 0)
 }
 
 #' delete
@@ -848,13 +897,13 @@ commonbuida <- function(joinfun=intersect,nn="000",patt=".?_....RData") {
 #putbuida
 #' @export
 putbuida <- function(x=commonbuida()) {
-  putrdatv(x,"jo","buida")
+  putrdatv(x,app="jo",type="buida",ver=0) #this is hardcoded to ensure persistence
 }
 
 #getbuida
 #' @export
 getbuida <- function(...) {
-  getrdatv("jo","buida",...)
+  getrdatv(app="jo",type="buida",ver=0,...)
 }
 
 # turn - median daily value

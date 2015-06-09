@@ -1,6 +1,8 @@
 require(aautil)
 require(testthat)
 aatopselect('test')
+putrd(letters)
+
 ird <- as.numeric(dirrd()[,max(num)])
 
 expect_equal(length(greprdatv(app='a',type='B',ver=9)),0)
@@ -13,6 +15,39 @@ expect_equal(i,greprdatv(app='a',type='B',ver=9))
 expect_equal(letters,getrdatv(app='a',type='B',ver=9))
 delrd(i)
 expect_equal(length(greprdatv(app='a',type='B',ver=9)),0)
+
+###rdatv
+rm(ver.g)
+#while(idxrd()>0) delrd()
+idxrd()
+pub tv(app='jo',type='x',ver=0)
+expect_equal(getv(),list(app='jo',type='x',ver=0))
+putv(app='test',ver=1)
+expect_equal(getv(),list(app='test',type='x',ver=1))
+putrdatv(x)
+expect_identical(x,getrd())
+expect_identical(idxrd(),greprdatv())
+i0 <- idxrd()
+putrdatv(LETTERS)
+expect_identical(idxrd(),i0) #overwrites
+expect_identical(LETTERS,getrd())
+expect_identical(greprdatv(),idxrd()) #grep finds this entry
+putv(app='test',ver=2)
+expect_equal(getv(),list(app='test',type='x',ver=2))
+putrdatv(x)
+expect_identical(x,getrd())
+expect_identical(idxrd(),greprdatv()) #grep finds this entry
+expect_identical(idxrd(),i0+1) #increments
+putv(app='test',type='jo',ver=2)
+expect_equal(getv(),list(app='test',type='jo',ver=2))
+putrdatv(x)
+expect_equal(greprdatv(app='test',type='jo',ver=2),idxrd())
+putv("test",'jo',2)
+i <- idxrd()
+expect_equal(i,nrow(ddv()))
+delrd(greprdatv())
+expect_equal(idxrd(),i-1)
+
 
 
 m<-as.matrix(airquality) #this has colnames as the key
