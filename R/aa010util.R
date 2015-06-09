@@ -16,7 +16,7 @@ rdroot <- function() {
     root.global
 }
 # rdroot <- function(){'..'}
-
+ 
 # abbrev - abbreviate and remove forbidden characters
 #' @export
 abbrev <- function(x, len = 30, rep = "", patt = list("\\.", "/", "&", "\\*", ":"), nospace = TRUE) {
