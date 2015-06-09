@@ -11,6 +11,7 @@ rddelim <- function() {
 }
 
 
+
 # rdroot - root directory containing rd
 #' @export
 rdroot <- function() {
