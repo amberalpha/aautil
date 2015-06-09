@@ -5,6 +5,7 @@ dern <- function(root = root.global, n = "001", type = c("BDH", "BDP", "macro"))
     paste0(root, type, "/derive-", n, "/")
 }
 
+
 # rddelim - delimiter between fields in filename
 rddelim <- function() {
     "_"
