@@ -182,7 +182,8 @@ getv <- function() {
 #' \dontrun{
 #' newrd()
 #' }
-newrd <- function() {
+newrd <- function(hard=FALSE) {
+    if(hard) {  shell(paste0("rd /s /q ",rdroot(),"\\rd"))  }
     system(paste0("mkdir ", rdroot(), "/rd"))
     x <- NULL
     putrd(x, "init", i = 0)
@@ -519,24 +520,26 @@ buiindirs <- function(dd = paste0(root.global, "/BDP/key1/", dir(paste0(root.glo
 #' unit tests
 #'
 #' @export
-aatests <- function() {
+aatests <- function(hard=FALSE) {
     require(aautil)
     aatopselect("test")
+    if(hard) { newrd(hard) }
     require(testthat)
     require(aabd)
-    system.time(test_file("../aa020bd/tests/aa020bdtest.R"))
+    test_dir("../aa010util/tests/")
+    x<-bbicon()
+    putsu(x,ver=0) #defaults to dax
+    test_dir("../aa020bd/tests/")
     require(aapa)
-    aapa::.global()
     require(aaco)
     require(aate)
     require(aara)
     require(aafa)
-    system.time(test_file("../aa030pa/tests/aa030patest.R"))
-    system.time(test_file("../aa040co/tests/aa040cotest.R"))
-    system.time(test_file("../aa050te/tests/aa050tetest.R"))
-    system.time(test_file("../aa060ra/tests/aa060ratest.R"))
-    system.time(test_file("../aa070fa/tests/aa070fatest.R"))
-    # test_file('./tests/aa080titest.R')
+    test_dir("../aa030pa/tests/")
+    test_dir("../aa040co/tests/")
+    test_dir("../aa050te/tests/")
+    test_dir("../aa060ra/tests/")
+    test_dir("../aa070fa/tests/")
 }
 
 
