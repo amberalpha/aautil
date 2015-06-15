@@ -183,10 +183,12 @@ getv <- function() {
 #' newrd()
 #' }
 newrd <- function(hard=FALSE) {
-    if(hard) {  shell(paste0("rd /s /q ",rdroot(),"\\rd"))  }
+    if(hard) {  
+      shell(paste0("rd /s /q ",rdroot(),"\\rd"))  
+      load("./RD/bics.RData")
+    }
     system(paste0("mkdir ", rdroot(), "/rd"))
-    x <- NULL
-    putrd(x, "init", i = 0)
+    putrd(bics, "bicsindustrydescription", i = 0)
 }
 #' get
 #'
@@ -520,27 +522,32 @@ buiindirs <- function(dd = paste0(root.global, "/BDP/key1/", dir(paste0(root.glo
 #' unit tests
 #'
 #' @export
-aatests <- function(hard=FALSE) {
-    require(aautil)
-    aatopselect("test")
-    if(hard) { newrd(hard) }
-    require(testthat)
-    require(aabd)
-    test_dir("../aa010util/tests/")
-    x<-bbicon()
-    putsu(x,ver=0) #defaults to dax
-    test_dir("../aa020bd/tests/")
-    require(aapa)
-    require(aaco)
-    require(aate)
-    require(aara)
-    require(aafa)
-    test_dir("../aa030pa/tests/")
-    test_dir("../aa040co/tests/")
-    test_dir("../aa050te/tests/")
-    test_dir("../aa060ra/tests/")
-    test_dir("../aa070fa/tests/")
+aatests <- function(hard=FALSE,do=list(aabd=T,aapa=T,aaco=T,aate=T,aara=T,aafa=T)) {
+  putv(ver=0)
+  require(aautil)
+  aatopselect("test")
+  if(hard) { newrd(hard) }
+  require(testthat)
+  require(aabd)
+  test_dir("../aa010util/tests/")
+  putsu(year=2013:2014) #defaults to dax
+  test_dir("../aa020bd/tests/") # pretty sure this does the derive actions
+  require(aapa)
+  require(aaco)
+  require(aate)
+  require(aara)
+  require(aafa)
+  if(do$aapa) test_dir("../aa030pa/tests/")
+  deraapa() # pretty sure this does the derive actions
+  if(do$aaco) test_dir("../aa040co/tests/")
+  deraaco()
+  if(do$aate) test_dir("../aa050te/tests/")
+  deraate()
+  if(do$aara) test_dir("../aa060ra/tests/")
+  #deraara() not exists
+  if(do$aafa) test_dir("../aa070fa/tests/")
 }
+
 
 
 
