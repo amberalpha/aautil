@@ -10,7 +10,6 @@ dern <- function(root = root.global, n = "001", type = c("BDH", "BDP", "macro"))
 rddelim <- function() {
     "_"
 }
-
 # rdroot - root directory containing rd
 #' @export
 rdroot <- function() {
@@ -40,7 +39,7 @@ abbrev <- function(x, len = 30, rep = "", patt = list("\\.", "/", "&", "\\*", ":
 # putrd
 putrd <- function(x, desc = deparse(substitute(x)), i = idxrd() + 1,usedesc=FALSE) {
     if(usedesc && 'desc'%in%names(attributes(x))) { desc <- attr(x,'desc') }
-    n <- formatC(i, width = 5, format = "d", flag = "0")
+    n <- numtotxt(i) #formatC(i, width = 5, format = "d", flag = "0")
     fnam <- paste(c(n, as.character(as.Date(Sys.time())), abbrev(desc)), collapse = rddelim())
     if (i == 0) {
         save(x, file = paste0(rdroot(), "/rd/", fnam, ".RData"))
@@ -134,6 +133,11 @@ greprdatv <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) {
   dd[grepl(descrdatv(app,type,ver), dirrd()[, des]), as.numeric(num)]
 }
 
+#' @export
+numtotxt <- function(i) {
+  formatC(i, width = 5, format = "d", flag = "0")
+}
+
 #' structured description
 #'
 #' paste up description from mnemonics
@@ -147,12 +151,24 @@ descrdatv <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) {
 }
 
 #' @export
-ddv <- function() {
-    dd <- dirrd()
-    dd[grep('^app.+type.+ver.+',des)]
+ddv <- function(ver=getv()$ver,app=getv()$app) { #return all dd matching app,ver
+  dd <- dirrd()
+  dd[grep(paste0('^app',app,'type.+ver',ver,'$'),des)]
 }
 
+#' @export
+nextv <- function() { #next version
+  i <- 1
+  while(0<nrow(ddv(i))) i <- i+1
+  i
+}
 
+#' @export
+newv <- function(isu,ver=nextv(),des=paste0(dirrd()[numtotxt(isu),des],'ird=',isu)) { #next version
+  putv(v=ver)
+  putrdatv(x=des,type='desc')
+  putrdatv(x=cleansu(getrd(isu)),type='su')
+}
 
 #' put version number
 #'
@@ -273,9 +289,9 @@ delrd <- function(i = idxrd()) {
 #' @export
 #' @examples
 #' greprd('^su ')
-greprd <- function(patt = "^su ") {
+greprd <- function(patt = "^su ",...) {
     dd <- dirrd()
-    dd[grepl(patt, dirrd()[, des]), as.numeric(num)]
+    dd[grepl(patt, dirrd()[, des],...), as.numeric(num)]
 }
 
 
@@ -519,24 +535,37 @@ buiindirs <- function(dd = paste0(root.global, "/BDP/key1/", dir(paste0(root.glo
     sort(unique(unlist(lapply(as.list(dd), buiindir))))
 }
 
+
+#' @export
+writezip <- function(ver = "test") {
+  path <- paste0(rappdirs::user_data_dir(), "\\aabb\\",ver)
+  fnam <- paste0(rappdirs::user_data_dir(), "\\aabb\\",ver,format(Sys.Date(),"%Y%m%d"),".zip")
+  shell(paste0("rm ",fnam))
+  shell(paste("zip -r ",fnam,path))
+}
+
 #' unit tests
 #'
 #' @export
 aatests <- function(hard=FALSE,do=list(aabd=T,aapa=T,aaco=T,aate=T,aara=T,aafa=T)) {
-  putv(ver=0)
   require(aautil)
+  writezip()
+  putv(ver=0)
   aatopselect("test")
   if(hard) { newrd(hard) }
   require(testthat)
   require(aabd)
   test_dir("../aa010util/tests/")
-  putsu(year=2013:2014) #defaults to dax
+  putv(ver=0)
+  #deraasu(year=2013:2014) #defaults to dax
+  deraasu(year=2004:2005) #defaults to dax
   test_dir("../aa020bd/tests/") # pretty sure this does the derive actions
   require(aapa)
   require(aaco)
   require(aate)
   require(aara)
   require(aafa)
+  deraasi()
   if(do$aapa) test_dir("../aa030pa/tests/")
   deraapa() # pretty sure this does the derive actions
   if(do$aaco) test_dir("../aa040co/tests/")
