@@ -157,11 +157,11 @@ ddv <- function(ver=getv()$ver,app=getv()$app) { #return all dd matching app,ver
 }
 
 #' @export
-nextv <- function() { #next version
-  i <- 1
-  while(0<nrow(ddv(i))) i <- i+1
-  i
+nextv <- function(app=getv()$app) { #return all dd matching app,ver
+  max(c(0,as.numeric(as.matrix(dirrd()[grep(paste0('^app',app),des),strsplit(des,'ver')][2,]))))+1
 }
+
+
 
 #' @export
 newv <- function(isu,ver=nextv(),des=paste0(dirrd()[numtotxt(isu),des],'ird=',isu)) { #next version
