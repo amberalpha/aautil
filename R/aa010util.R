@@ -179,6 +179,16 @@ putv <- function(app="jo",type="x",ver=1) {
   ver.g <<- list(app=app,type=type,ver=ver)
 }
 
+#' put version number
+#'
+#' @param n number
+#' @keywords data
+#' @export
+setv <- function(ver=getv()$ver, app=getv()$app, type=getv()$type) {
+  ver.g <<- list(app=app,type=type,ver=ver)
+}
+
+
 #' get version number
 #'
 #' @keywords data
@@ -580,10 +590,10 @@ aatests <- function(hard=FALSE,do=list(aabd=T,aapa=T,aaco=T,aate=T,aara=T,aafa=T
 
 
 
-
+#as.Date("1996-01-03")
 
 #' @export
-derca <- function(start = "1996-01-03", end = "2020-12-24", select = 3, ...) {
+derca <- function(start = "1989-01-11", end = "2020-12-24", select = 3, ...) {
     ca <<- data.table(date = extractDates(seq(from = as.Date(start), to = as.Date(end), by = 1), select = select, ...), 
         key = "date")
 }
@@ -1123,4 +1133,104 @@ imgzoo <- function(z,                 #zoo
   ))
   zzz <- t(zz[,jorder])[,nrow(zz):1]
   image(zzz,xlab="bui",ylab="date",axes=FALSE,...)
+}
+
+#####ssc section (futures)
+
+#right blank append to achieve a fixed total number of chars nch
+#' @export
+sscrba <- function(bui=sscread()[,ticker],nch=2) {
+  as.character(sapply(bui,function(x,nch){paste0(x,paste(rep(' ',max(0,nch-nchar(x))),collapse=''))},nch=nch))
+}
+
+#right trim to n 
+#' @export
+sscrt <- function(bui=sscread()[,ticker],nch=3) {
+  substr(bui,1,nch)
+}
+
+#right blank/number strip
+#' @export
+sscrbs <- function(bui=sscrba(),trim=c("space","number")) {
+  trim <- match.arg(trim)
+  patt <- switch(trim, 
+                 space=' $',
+                 number='(0|[1-9][0-9]*)$'
+  )
+  stripr <- function(x){
+    while(grepl(patt=patt,x=x,perl=TRUE)) {
+      x <- substr(x,1,nchar(x)-1)
+    } 
+    x
+  }
+  as.character(sapply(bui,stripr))
+}
+
+#month append
+#' @export
+sscma <- function(bui=sscrba(),nm=1:3) {
+  sort(as.character(outer(FUN=paste0,bui,nm)))
+}
+
+#yellow strip/append
+#' @export
+sscy <- function(bui=sscma(),append=TRUE) {
+  for(i in seq_along(bui)) {
+    if(grepl(patt=' Comdty$',x=bui[i],perl=TRUE,ignore.case=TRUE)) {
+      bui[i] <- substr(bui[i],1,nchar(bui[i])-nchar(" Comdty"))
+    }
+    bui[i] <- sscrbs(bui[i])
+  }
+  if(append) {
+    bui <- paste(bui,' Comdty')
+  }
+  bui
+}
+
+#convert vector of tickers to names with/without month
+#' @export
+sscname <- function(bui=sscy(sscma()),withn=TRUE) {
+  buin <- substr(sscy(bui,append=FALSE),3,3) #number as string
+  buix <- sscrbs(sscy(bui,append=FALSE),trim='num') #bui without number
+  name1 <- sscread()[buix,name]
+  if(withn) {name1 <- paste0(name1,substr(sscy(bui,append=FALSE),3,3))}
+  name1
+}
+
+#construct ticker modifier
+#' @export
+sscadj <- function(bui=sscy(),roll=c('A','B','R','F','N','D','O'),adjust=c('N','D','R','W'),days=0) { #active/rel.to.expiry/option.expiry ; none/difference
+  roll <- match.arg(roll)
+  adjust <- match.arg(adjust)
+  datepart <- paste0(':',zeroprepend(days,2),'_0_')
+  sscy(paste0(sscy(bui,append=FALSE),paste0(' ',roll,datepart,adjust,' ')))
+}
+
+#construct a mnemonic
+#' @export
+sscmnem <- function(roll=c('A','B','R','F','N','D','O'),adjust=c('N','D','R','W'),mnem=c('P','R','T','O'),nahandle=c('N','L','F'),class=c('Z','D'),days=0) {
+  paste0(match.arg(roll),zeroprepend(days,2),match.arg(adjust),match.arg(mnem),match.arg(nahandle),match.arg(class))
+}
+
+#dates with data
+#' @export
+sscda <- function(buida=gett("buida")) {
+  ca[(date>=buida$da[1])&(date<=max(buida$da)),date]
+}
+
+
+#' @export
+all_identical <- function(x) {
+  if (length(x) == 1L) {
+    warning("'x' has a length of only 1")
+    return(TRUE)
+  } else if (length(x) == 0L) {
+    warning("'x' has a length of 0")
+    return(logical(0))
+  } else {
+    TF <- vapply(1:(length(x)-1),
+                 function(n) identical(x[[n]], x[[n+1]]),
+                 logical(1))
+    if (all(TF)) TRUE else FALSE
+  }
 }
