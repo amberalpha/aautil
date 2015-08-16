@@ -1234,3 +1234,131 @@ all_identical <- function(x) {
     if (all(TF)) TRUE else FALSE
   }
 }
+
+#sundry library routines for sdl, all small mods from other libraries as indicated below
+#main mod is to expunge all SQL references so that it runs on spark
+#these need tidying up because should not rely on ca - not currently in use, transferred from sdl 2015-08
+
+####from 00lib [I think]
+#iz - test for valid zoo
+#' @export
+iz <- function(x) {
+  class(x)=="zoo" && class(index(x))=="Date"
+}
+
+####from folib
+#sdl - shiller's smoothness prior
+#' @export
+sdl <- function(
+  yxraw,
+  la=-(10:1),
+  w=seq(from=1,to=3,length=nrow(yx)),
+  b1=1,   #tail=0
+  b2=1,   #head=0
+  b3=1,   #curv=0
+  b4=0,   #triangular
+  bb=1,   #overall bayes
+  napex=floor(length(la)/2)  #apex of triangle
+)
+{
+  #rm(list="DBcon",envir=globalenv())
+  if(ncol(yxraw)==2) {yx <- yxraw} else if(ncol(yxraw)==1) {yx <- cbind(yxraw,yxraw)}
+  nn <- length(la)
+  x <- folagpad(yx[,-1,drop=FALSE],k=la,pad=TRUE)
+  da <- index(x)
+  dafit <- da[apply(!is.na(x),1,all)]              #fit: only x required
+  daest <- as.Date(intersect(dafit,index(yx)[!is.na(yx[,1])]))    #estimation: both y and x available
+  dum1 <- t(c(1,rep(0,nn-1)))
+  dum2 <- rev(dum1)
+  dum <- rbind(
+    dum1*b1*6,
+    dum2*b2*3
+  )
+  if(nn>2) {    
+    dum3 <- sdlcurv(nn)
+    if(b4!=0) {
+      n1 <- floor(napex)-1
+      n2 <- length(la)-(n1+1)
+      dum4a <- c( rep(0,n1-1), 1, -(n1-1)/n1,  rep(0,n2) )
+      dum4b <- c( rep(0,n1), (n2-1)/n2, -1,  rep(0,n2-1) )
+      idum3 <- which(dum3[,floor(napex)]==-2)
+      dum3 <- dum3[-idum3,]
+      dum <- rbind(dum4a*b4,dum4b*b4,dum1*b4,dum2*b4,dum3*b4)
+    }
+    dum <- rbind(dum,
+                 dum3*b3*20 
+    )
+  }
+  dum <- bb*dum
+  rr <- crossprod(dum)*as.numeric(crossprod(yx[,2]))
+  yx <- cbind(yx[daest,1],x[daest,,drop=FALSE])
+  res <- wls(
+    yx=coredata(yx),
+    w=w,
+    rr=rr
+  )
+  res <- c(res,fit=NA)
+  res$fit <- zoo(cbind(NA,cbind(1,coredata(x[dafit,,drop=FALSE]))%*%t(res$coef)),dafit)
+  res$fit[match(daest,index(res$fit)),1] <- yx[daest,1] #bug in [<-.zoo so workaround with match
+  res
+}
+#sdlcurv - finite difference curvature
+#' @export
+sdlcurv <- function(nn)
+{
+  dum <- matrix(0,nn-2,nn)
+  ij <- cbind(1:(nn-2),1:(nn-2))
+  dum[ij] <- 1
+  ij[,2] <- ij[,2]+1
+  dum[ij] <- -2
+  ij[,2] <- ij[,2]+1
+  dum[ij] <- 1
+  dum
+}
+#folagpad - lag a single column zoo without losing data, output has k additional rows which contain NA, nb lag direction is as for lag()
+#' @export
+folagpad <- function(
+  x,      #zoo
+  k,      #lags
+  pad=TRUE
+)
+{
+  #stopifnot(length(k)>=1 && valla(k))
+  #stopifnot( iz(x) && ncol(x)==1 )
+  d1 <- min(index(x))
+  d2 <- max(index(x))
+  if(pad) {
+    mydates <- as.Date(extrca(offda(x=d1,lags=-max(c(k,0))),offda(x=d2,lags=-min(c(k,0)))))
+  } else {
+    mydates <- index(x)
+  }
+  #stopifnot(all(mydates%in%as.Date(getca())))
+  res <- lags(as.numeric(coredata(x)),k,pad=pad)
+  zoo(res,mydates)
+}
+#wls - weighted least squares for use in sdl, allows bayesian mod to xx
+#' @export
+wls <- function(yx,w=rep(1,nrow(yx)),rr=NULL)
+{
+  if(is.null(rr)) rr <- matrix(0,ncol(yx)-1,ncol(yx)-1)
+  rr <- rbind(0,cbind(0,rr))
+  y <- yx[,1,drop=FALSE]
+  x <- cbind(1,yx[,-1,drop=FALSE])
+  xwgt <- sweep(x,MARGIN=1,STATS=w,FUN="*")
+  co <- solve(t(xwgt)%*%x + rr) %*% t(xwgt)%*%y
+  yvar <- cov.wt(y,wt=w,meth="ML")$cov[1,1,drop=TRUE]
+  residvar <- cov.wt(y-x%*%co,wt=w,meth="ML")$cov[1,1,drop=TRUE]
+  r.squared <- 1-residvar/yvar
+  list(
+    coef=t(co),
+    r.squared=r.squared
+  )
+}
+
+#' @export
+getca <- function(){ca}
+
+#' @export
+extrca <- function(t1, t2) {
+  ca[(as.character(t1)<=ca)&(ca<=as.character(t2))]  
+}

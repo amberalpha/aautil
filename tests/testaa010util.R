@@ -58,14 +58,15 @@ if(irdend>irdstart) {
 
 
 if(FALSE) {
-m<-as.matrix(airquality) #this has colnames as the key
-rownames(m)<-paste0(m[,'Month'],'-',m[,'Day'])
-df<-mattotab(m)
-dt2 <- setkey(data.table(tabtomat(df)),Month,Day)
-setcolorder(dt2,colnames(airquality))[]
-#but modes differ after round trip - this is messy
-
-require(reshape2)
-dfx <- melt(airquality) #corresponds to mattotab
-head(dcast(dfx,value ~ variable)) #not what is wanted... leave this for now
+  m<-as.matrix(airquality) #this has colnames as the key
+  rownames(m)<-paste0(m[,'Month'],'-',m[,'Day'])
+  df<-mattotab(m)
+  dt2 <- setkey(data.table(tabtomat(df)),Month,Day)
+  setcolorder(dt2,colnames(airquality))[]
+  #but modes differ after round trip - this is messy
+  
+  require(reshape2)
+  dfx <- melt(airquality) #corresponds to mattotab
+  head(dcast(dfx,value ~ variable)) #not what is wanted... leave this for now
 }
+
