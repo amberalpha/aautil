@@ -115,6 +115,15 @@ getrdatv <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) {
 }
 
 
+#' @export
+gett <- function(ty) {getrdatv(ty=ty)} #this should be same as other copies and put in util
+
+#' @export
+putt <- function(x) {
+  putrdatv(x,ty=deparse(substitute(x)))
+  x
+}
+
 #' grep existing entry with structured description
 #'
 #' grep for an object with app, type, version in description
