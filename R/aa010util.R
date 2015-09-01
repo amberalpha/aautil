@@ -166,14 +166,14 @@ ddv <- function(ver=getv()$ver,app=getv()$app) { #return all dd matching app,ver
 }
 
 #' @export
-ddv1 <- function(ver=getv()$ver,app=getv()$app,type=getv()$type) { #return all dd matching app,ver
-  dd <- dirrd()
+ddv1 <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) { #return all dd matching app,ver
+  dd <- dirrd()[!is.na(des)]
   subg <- function(x){ifelse(x=='*','.+',x)}
-  ver <- subg(ver)
+  ver <- paste0(subg(ver),'$')
   app <- subg(app)
   type <- subg(type)
-  ird <- greprd(perl=T,patt=paste(paste(c('app','type','ver'),c(app,type,ver),sep=''),collapse=''),dirrd()[,des])
-  dirrd()[ird]
+  i <- greprd(perl=T,patt=paste(paste(c('app','type','ver'),c(app,type,ver),sep=''),collapse=''),dirrd()[,des])
+  dd[zeroprepend(i,5)]
 }
 
 #' @export
