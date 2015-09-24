@@ -178,7 +178,7 @@ ddv1 <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) { #return all d
 
 #' @export
 nextv <- function(app=getv()$app) { #return all dd matching app,ver
-  max(c(0,as.numeric(as.matrix(dirrd()[grep(paste0('^app',app),des),strsplit(des,'ver')][2,]))))+1
+  suppressWarnings(max(c(0,as.numeric(as.matrix(dirrd()[grep(paste0('^app',app),des),strsplit(des,'ver')][2,]))),na.rm=T)+1)
 }
 
 
@@ -204,7 +204,7 @@ putv <- function(app="jo",type="x",ver=1) {
 #' @param n number
 #' @keywords data
 #' @export
-setv <- function(ver=getv()$ver, app=getv()$app, type=getv()$type) {
+setv <- function(app=getv()$app, type=getv()$type, ver=getv()$ver) {
   ver.g <<- list(app=app,type=type,ver=ver)
 }
 
@@ -1381,4 +1381,16 @@ getca <- function(){ca}
 #' @export
 extrca <- function(t1, t2) {
   ca[(as.character(t1)<=ca)&(ca<=as.character(t2))]  
+}
+
+#' @export
+deploydata <- function(vin=getv()$ver,vout=nextv(),type=c('segexd','setdad','scoxd','decd','yxtad','ldgxd','yxtapd','wimad','dezod','xvmd','xvijd','ijsed','segsumd','fosumd','fisumd','celid')) {
+  stopifnot(!any(is.na(list(vin,vout,type))) && length(vin)==1 && length(vout)==1 && length(type)>0)
+  for(i in seq_along(type)) {
+    print(type[i])
+    x <- getrdatv(type=type[i],v=vin)
+    stopifnot(!is.na(x) && !is.null(x)) #input exists
+    stopifnot(is.null(getrdatv(v=vout,type=type[i]))) #no overwrite
+    putrdatv(x,v=vout,type=type[i])
+  }
 }
