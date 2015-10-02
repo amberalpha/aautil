@@ -1394,3 +1394,5 @@ deploydata <- function(vin=getv()$ver,vout=nextv(),type=c('segexd','setdad','sco
     putrdatv(x,v=vout,type=type[i])
   }
 }
+
+#test github
