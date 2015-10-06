@@ -70,3 +70,19 @@ if(FALSE) {
   head(dcast(dfx,value ~ variable)) #not what is wanted... leave this for now
 }
 
+if(FALSE) {
+#small example of mdl
+require(zoo)
+require(lrmest)
+z <- zoo(rnorm(1000),1:1000)
+yx <- z
+nj <- 40
+for(i in 1:nj) yx <- cbind(yx,lag(z,i))
+yx <- yx[1:500,]
+colnames(yx)<- c('Y',paste0('X',1:nj))
+yx <- data.frame(yx)
+m1 <- mvp(nj)
+xx <- mixe(Y~.-1,r=rep(0,nj),R=m1$r,dpn=as.numeric(m1$dpn)/1e6,delt=rep(0,nj),data=yx)[[1]]
+
+plot(xx[,1]) #yay!
+}

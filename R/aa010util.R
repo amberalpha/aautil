@@ -1395,3 +1395,36 @@ deploydata <- function(vin=getv()$ver,vout=nextv(),type=c('segexd','setdad','sco
   }
 }
 
+#multivariate prior: returns the pattern matrix R and tightness dpn for mixe()
+#' @export
+mvp <- function(
+  len=3:6, #number of lags in the distribution (vector)
+  dpnc=seq_along(len), #dp for curvature (slackness on prior, see mixe)
+  dpnh=dpnc, #dp for head
+  dpnt=dpnc #dp for tail
+  ) {
+  stopifnot(all(3<=len))
+  stopifnot(all(unlist(lapply(list(dpnc,dpnh,dpnt),length))==length(len)))
+  s1 <- lapply(len,sdlcurv)  #strengths
+  i0 <- unlist(lapply(s1,nrow))
+  i2 <- cumsum(i0)
+  i1 <- i2+1-i0
+  j0 <- unlist(lapply(s1,ncol))
+  j2 <- cumsum(j0)
+  j1 <- j2+1-j0
+  xcurv <- matrix(0,max(i2),max(j2))
+  xtail <- xhead <- matrix(0,length(s1),max(j2))
+  dpn <- NULL
+  for(i in seq_along(s1)) {
+    xcurv[i1[i]:i2[i],j1[i]:j2[i]] <- s1[[i]]
+    dpn <- rbind(dpn,as.matrix(rep(dpnc[i],i0[i])))
+    xhead[i,j1[i]] <- 1
+    dpn <- rbind(dpn,dpnh[i])
+    xtail[i,j2[i]] <- 1
+    dpn <- rbind(dpn,dpnt[i])
+  }
+  rr <- rbind(xcurv,xhead,xtail)
+  list(r=rr,dpn=dpn)
+}
+
+#combine y with an x lag distribution ; return single zoo
