@@ -963,6 +963,11 @@ commonbuida <- function(joinfun=intersect,nn="000",patt=".?_....RData") {
   }
 }
 
+#' @export
+bodgebuida <- function() { #allows aapa to build
+  putrdatv(list(bui=letters,da=seq.Date(from=Sys.Date()-100,to=Sys.Date(),by=1)),app='jo',v=0,ty='buida')
+}
+
 #putbuida
 #' @export
 putbuida <- function(x=commonbuida()) {
