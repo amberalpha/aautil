@@ -1432,4 +1432,58 @@ mvp <- function(
   list(r=rr,dpn=dpn)
 }
 
+#tgt.solve.QP - uses uniroot to adjust risk aversion to achieve a target
+
+#' @export
+tgt.solve.QP <- function(
+  ce,         #ce
+  dvec,       #return, colnames(dvec) in ce
+  constr,     #constraints list(Am,bv,meq) - nrows(constr$Am)=ncol(dvec)
+  tgt=.1,     #target for vol or gross
+  ttyp=c("gross","vol"),   #target type
+  tol=.1,      #tolerance
+  vcomp=c("T","S","R","M","precalc")
+)
+{
+  ttyp <- match.arg(ttyp)
+  vcomp <- match.arg(vcomp)
+  stopifnot(tgt>0)
+  stopifnot(tol>1.e-18)
+  stopifnot(!is.null(rownames(dvec))&& (all(rownames(dvec)%in%buice(ce)) || vcomp=="precalc"))
+  `volqp` <- function(w,Dmat) {sqrt(as.numeric(t(w)%*%Dmat%*%w))} #these functions inside due to limited error checking for performance
+  `grossqp` <- function(w,Dmat) {sum(abs(w))}
+  `tgtqp` <- function(x, Dmat, dvec, constr, tgt, ttyp, objfun) {
+    w <- solve.QP(Dmat=x*Dmat, dvec=dvec, Amat=constr$Am, bvec=constr$bv, meq=constr$meq)$solution
+    return(objfun(w=w,Dmat=Dmat) - tgt)
+  }
+  bui <- rownames(dvec)
+  objfun <- switch(ttyp,'vol'=volqp,'gross'=grossqp)
+  if(vcomp=="precalc") {Dmat <- ce} else {Dmat <- vcvce(ce)[[vcomp]][bui,bui]}
+  w0 <- solve(Dmat,dvec) 
+  scal <- objfun(w=w0,Dmat=Dmat)
+  upr <- 5*scal/tgt #gives tgt-tgt*<0 because tgt decreases with lambda (checked on next line)
+  if(tgtqp(x=upr, Dmat=Dmat, dvec=dvec, constr=constr, tgt=tgt, ttyp=ttyp, objfun=objfun)>0) stop("unexpected condition in tgt.solve.QP")
+  lwr <- .05*scal/tgt #first estimate for upper bound
+  while(tgtqp(x=lwr, Dmat=Dmat, dvec=dvec, constr=constr, tgt=tgt, ttyp=ttyp, objfun=objfun)<0) {lwr <- lwr*.2;print(paste("lowering lambda for soln. -",lwr))}
+  estim.prec <- root <- 1
+  while(estim.prec>0.01*root && tol>1.e-18) {
+    sol <- uniroot(
+      f=tgtqp,
+      interval=c(upr,lwr),
+      Dmat=Dmat, 
+      dvec=dvec, 
+      constr=constr,
+      tgt=tgt,
+      ttyp=ttyp,
+      tol=tol,
+      objfun=objfun)
+    root <- sol$root
+    estim.prec <- sol$estim.prec
+    tol <- tol/10
+    if(estim.prec>0.01*root) print("lowering tolerance to achieve accuracy")
+  }
+  sol <- solve.QP(Dmat=root*Dmat, dvec=dvec, Amat=constr$Am, bvec=constr$bv, meq=constr$meq)
+  list(root=root,solution=sol) 
+}
+
 #combine y with an x lag distribution ; return single zoo
