@@ -543,9 +543,13 @@ aatopcreate <- function() {
 
 # create very top dirs
 #' @export
-aatopselect <- function(ver = c("prod", "test")) {
+aatopselect <- function(ver = c("prod", "test",".")) {
     ver <- match.arg(ver)
-    root.global <<- paste0(rappdirs::user_data_dir(), "\\aabb\\", ver, "\\")
+    if(ver!='.') {
+      root.global <<- paste0(rappdirs::user_data_dir(), "\\aabb\\", ver, "\\")
+    } else {
+      root.global <<- "."
+    }
 }
 
 #' @export
@@ -1487,3 +1491,20 @@ tgt.solve.QP <- function(
 }
 
 #combine y with an x lag distribution ; return single zoo
+
+
+#' @export
+getp <- function(sname1=NULL,pname1=NULL,pars=gett('pars'),j='pvalue') {
+  if(is.null(sname1)&is.null(pname1)) return(NULL)
+  text1 <- ifelse(is.null(sname1),'TRUE',paste0('sname==sname1'))
+  text2 <- ifelse(is.null(pname1),'TRUE',paste0('pname== pname1'))
+  text <- paste0(text1,'&',text2) #browser()
+  if(j=='pvalue') {
+    x <- pars[eval(parse(text=text)),]
+    if(nrow(x)==0) return(NULL) #dk why it hangs otherwise
+    x <- x[,x:=as(pvalue,pmode),iseq][,x]
+  } else {
+    x <- setkey(pars[eval(parse(text=text)),],pname)[]
+  }
+  x
+}
