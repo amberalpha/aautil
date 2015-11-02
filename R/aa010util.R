@@ -18,7 +18,7 @@ rdroot <- function() {
 
 # abbrev - abbreviate and remove forbidden characters
 #' @export
-abbrev <- function(x, len = 30, rep = "", patt = list("\\.", "/", "&", "\\*", ":"), nospace = TRUE) {
+abbrev <- function(x, len = 30, rep = "", patt = list("\\.", "/", "&", "\\*", ":",","), nospace = TRUE) {
     if (nospace) 
         patt <- union(patt, " ")
     x <- abbreviate(x, minl = len)
@@ -1507,4 +1507,12 @@ getp <- function(sname1=NULL,pname1=NULL,pars=gett('pars'),j='pvalue') {
     x <- setkey(pars[eval(parse(text=text)),],pname)[]
   }
   x
+}
+
+maxver <- function(ver='*',type='*') {
+  max(as.numeric(unlist(lapply(strsplit(ddv1(v=ver,t=type)[,des],split='ver'),'[',2))))
+}
+
+getlast <- function(ty='edppd') {
+  getrd(ddv1(ty=ty,ver=maxver(ty=ty))[,as.numeric(num)])
 }
