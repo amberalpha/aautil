@@ -1519,6 +1519,16 @@ getpv <- function(step='pp',par='fnam',pp=gett('pars')) {
 }
 
 #' @export
+getpall <- function(pars=gett('pars')) { #assigns all scalar pars in the global environment
+  if(is.null(pars)) return()
+  p1 <- pars[,.N,pname][(N==1)&(0<nchar(pname))&substr(pname,1,1)%in%c(letters,LETTERS)]
+  for(i in 1:nrow(p1)) {
+    pp <- getp(pname=p1[i,pname],j='')
+    assign(x=pp[,pname],value=pp[,pvalue],env=globalenv())
+  }
+}
+
+#' @export
 maxver <- function(ver='*',type='*') {
   max(as.numeric(unlist(lapply(strsplit(ddv1(v=ver,t=type)[,des],split='ver'),'[',2))))
 }
