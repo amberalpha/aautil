@@ -1510,6 +1510,15 @@ getp <- function(sname1=NULL,pname1=NULL,pars=gett('pars'),j='pvalue') {
 }
 
 #' @export
+getpv <- function(step='pp',par='fnam',pp=gett('pars')) {
+  if(pp[par,all(mode(pvalue)==pmode)]) {
+    return(pp[par,pvalue])
+  } else {
+    return(as(pp[par,pvalue],pp[par,unique(pmode)]))
+  }
+}
+
+#' @export
 maxver <- function(ver='*',type='*') {
   max(as.numeric(unlist(lapply(strsplit(ddv1(v=ver,t=type)[,des],split='ver'),'[',2))))
 }
