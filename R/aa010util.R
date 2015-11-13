@@ -1521,19 +1521,18 @@ getlast <- function(ty='edppd') {
 
 #----timing protocol
 
-# newtime <- function() { #not needed - starttime initialises ok
-#   timed <- cbind(as.data.table(getv()),data.table(start=Sys.time(),end=Sys.time(),elapsed=1))[-1]
-#   putt(timed)
-# }
+#' @export
 newtime <- function(){putrdatv(NULL,ty='timed')}
+#' @export
 starttime <- function(typex='x') {
   oldtimed <- gett('timed')[type!=typex]
   timed <- cbind(as.data.table(getv()),data.table(start=Sys.time(),end=Sys.time(),elapsed=0L))[,type:=typex]
   timed <- setkey(rbind(oldtimed,timed),type)
   putt(timed)
 }
+#' @export
 endtime <- function(typex='x') {
-  timed <- timed <- gett('timed')
+  timed <- gett('timed')
   timed[type==typex,end:=Sys.time()][type==typex,elapsed:=as.integer(end-start)]
   putt(timed)
 }
