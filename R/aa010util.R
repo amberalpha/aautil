@@ -1525,7 +1525,8 @@ getlast <- function(ty='edppd') {
 newtime <- function(){putrdatv(NULL,ty='timed')}
 #' @export
 starttime <- function(typex='x') {
-  oldtimed <- gett('timed')[type!=typex]
+  oldtimed <- gett('timed')
+  if(!is.null(oldtimed)) oldtimed[type!=typex]
   timed <- cbind(as.data.table(getv()),data.table(start=Sys.time(),end=Sys.time(),elapsed=0L))[,type:=typex]
   timed <- setkey(rbind(oldtimed,timed),type)
   putt(timed)
