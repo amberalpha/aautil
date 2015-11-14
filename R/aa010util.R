@@ -91,6 +91,7 @@ putrdatv <- function(x,app=getv()$app,type=getv()$type,ver=getv()$ver,i = idxrd(
     i <- max(ii)
     delrd(i=ii)
   }
+  endtime(type)
   putrd(x,desc=paste0('app',app,'type',type,'ver',ver),i=i)
 }
 #' get using structured description
@@ -1545,14 +1546,17 @@ newtime <- function(){putrdatv(NULL,ty='timed')}
 #' @export
 starttime <- function(typex='x') {
   oldtimed <- gett('timed')
-  if(!is.null(oldtimed)) oldtimed[type!=typex]
+  if(!is.null(oldtimed)) oldtimed <- oldtimed[type!=typex]
   timed <- cbind(as.data.table(getv()),data.table(start=Sys.time(),end=Sys.time(),elapsed=0L))[,type:=typex]
   timed <- setkey(rbind(oldtimed,timed),type)
   putt(timed)
 }
 #' @export
 endtime <- function(typex='x') {
-  timed <- gett('timed')
+  timed <<- gett('timed')
+  if(is.null(timed)) return(NULL)
   timed[type==typex,end:=Sys.time()][type==typex,elapsed:=as.integer(end-start)]
   putt(timed)
 }
+#' @export
+showtime <- function() {gett('timed')}
