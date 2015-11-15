@@ -91,7 +91,6 @@ putrdatv <- function(x,app=getv()$app,type=getv()$type,ver=getv()$ver,i = idxrd(
     i <- max(ii)
     delrd(i=ii)
   }
-  endtime(type)
   putrd(x,desc=paste0('app',app,'type',type,'ver',ver),i=i)
 }
 #' get using structured description
@@ -1543,20 +1542,40 @@ getlast <- function(ty='edppd') {
 
 #' @export
 newtime <- function(){putrdatv(NULL,ty='timed')}
+
 #' @export
 starttime <- function(typex='x') {
   oldtimed <- gett('timed')
   if(!is.null(oldtimed)) oldtimed <- oldtimed[type!=typex]
-  timed <- cbind(as.data.table(getv()),data.table(start=Sys.time(),end=Sys.time(),elapsed=0L))[,type:=typex]
+  timed <- cbind(as.data.table(getv()),data.table(start=Sys.time(),end=Sys.time(),hrs=0L))[,type:=typex]
   timed <- setkey(rbind(oldtimed,timed),type)
   putt(timed)
 }
+
 #' @export
 endtime <- function(typex='x') {
-  timed <<- gett('timed')
+  timed <- gett('timed')
   if(is.null(timed)) return(NULL)
-  timed[type==typex,end:=Sys.time()][type==typex,elapsed:=as.integer(end-start)]
+  timed[type==typex,end:=Sys.time()]
+  timed[,hrs:=round(as.numeric(end-start)/3600,2)]
+  setkey(timed,start)
   putt(timed)
 }
+
 #' @export
 showtime <- function() {gett('timed')}
+
+#' @export
+ttf <- function(x) {
+  starttime(x)
+  do.call(x,args=list())
+  endtime(x)
+  showtime()
+}
+
+#' @export
+deltime <- function(i) {
+  timed <- showtime()
+  timed <- timed[-i]
+  putt(timed)
+}
