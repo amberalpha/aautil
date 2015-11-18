@@ -1396,8 +1396,11 @@ extrca <- function(t1, t2) {
   ca[(as.character(t1)<=ca)&(ca<=as.character(t2))]  
 }
 
+v1deploydata <- function(){c('segexd','setdad','scoxd','decd','yxtad','ldgxd','yxtapd','wimad','dezod','xvmd','xvijd','ijsed','segsumd','fosumd','fisumd','celid')}
+v2deploydata <- function(){c('scoxd','dezod','cncd','zomad')}
+
 #' @export
-deploydata <- function(vin=getv()$ver,vout=nextv(),type=c('segexd','setdad','scoxd','decd','yxtad','ldgxd','yxtapd','wimad','dezod','xvmd','xvijd','ijsed','segsumd','fosumd','fisumd','celid')) {
+deploydata <- function(vin=getv()$ver,vout=nextv(),type=v2deploydata()) {
   stopifnot(!any(is.na(list(vin,vout,type))) && length(vin)==1 && length(vout)==1 && length(type)>0)
   for(i in seq_along(type)) {
     print(type[i])
