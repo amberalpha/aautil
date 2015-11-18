@@ -68,6 +68,10 @@ descrd <- function(i=idxrd()) {
 }
 
 
+#' @export
+badrd <- function() {
+  dirrd()[,.N,num][N>1]
+}
 
 #' put with structured description
 #'
