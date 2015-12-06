@@ -161,8 +161,8 @@ getrdatv <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) {
 gett <- function(ty) {getrdatv(ty=ty)} #this should be same as other copies and put in util
 
 #' @export
-putt <- function(x,ty=deparse(substitute(x))) {
-  putrdatv(x,ty=ty)
+putt <- function(x,ty=deparse(substitute(x)),save=T) {
+  if(save) { putrdatv(x,ty=ty) }
   x
 }
 
