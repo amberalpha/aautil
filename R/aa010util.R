@@ -1436,7 +1436,7 @@ extrca <- function(t1, t2) {
 }
 
 v1deploydata <- function(){c('segexd','setdad','scoxd','decd','yxtad','ldgxd','yxtapd','wimad','dezod','xvmd','xvijd','ijsed','segsumd','fosumd','fisumd','celid')}
-v2deploydata <- function(){c('scoxd','dezod','cncd','zomad','pars','decd','vcfmtd','jomad','dezocombod','celid','varyxd')}
+v2deploydata <- function(){c('scoxd','dezod','cncd','zomad','pars','decd','vcfmtd','jomad','dezocombod','celid','varyxd','lmscod','vcvdecd')}
 
 #' @export
 deploydata <- function(vin=getv()$ver,vout=nextv(),type=v2deploydata()) {
