@@ -482,7 +482,7 @@ zoonorm <- function(x, dimension = c("ts", "xs", "tsxs"), ...) {
     if (dimension == "tsxs") {
         res[] <- mynorm(as.numeric(x))
     }
-    stopifnot(identical(dim(res), dim(x)) && identical(sum(is.na(x)), sum(is.na(res))))
+    #stopifnot(identical(dim(res), dim(x)) && identical(sum(is.na(x)), sum(is.na(res))))
     res
 }
 
@@ -1624,4 +1624,15 @@ deltime <- function(i) {
   timed <- showtime()
   timed <- timed[-i]
   putt(timed)
+}
+
+#' add rownames to zoo
+#' 
+#' in case rownames got lost, put them back
+#' @param z zoo
+#' @export
+zm <- function(z) {
+  stopifnot(is.zoo(z))
+  rownames(z) <- as.character(index(z))
+  z
 }
