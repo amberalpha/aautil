@@ -1322,21 +1322,19 @@ iz <- function(x) {
 #sdl - shiller's smoothness prior
 #' @export
 sdl <- function(
-  yxraw,
+  yxraw=gett('sdl0d'),
   la=-(10:1),
   w=seq(from=1,to=3,length=nrow(yx)),
   b1=1,   #tail=0
   b2=1,   #head=0
   b3=1,   #curv=0
-  b4=0,   #triangular
   bb=1,   #overall bayes
   napex=floor(length(la)/2)  #apex of triangle
 )
 {
-  #rm(list="DBcon",envir=globalenv())
   if(ncol(yxraw)==2) {yx <- yxraw} else if(ncol(yxraw)==1) {yx <- cbind(yxraw,yxraw)}
   nn <- length(la)
-  x <- folagpad(yx[,-1,drop=FALSE],k=la,pad=TRUE)
+  x <- folagpad.sdl(yx[,-1,drop=FALSE],k=la)
   da <- index(x)
   dafit <- da[apply(!is.na(x),1,all)]              #fit: only x required
   daest <- as.Date(intersect(dafit,index(yx)[!is.na(yx[,1])]))    #estimation: both y and x available
@@ -1348,15 +1346,6 @@ sdl <- function(
   )
   if(nn>2) {    
     dum3 <- sdlcurv(nn)
-    if(b4!=0) {
-      n1 <- floor(napex)-1
-      n2 <- length(la)-(n1+1)
-      dum4a <- c( rep(0,n1-1), 1, -(n1-1)/n1,  rep(0,n2) )
-      dum4b <- c( rep(0,n1), (n2-1)/n2, -1,  rep(0,n2-1) )
-      idum3 <- which(dum3[,floor(napex)]==-2)
-      dum3 <- dum3[-idum3,]
-      dum <- rbind(dum4a*b4,dum4b*b4,dum1*b4,dum2*b4,dum3*b4)
-    }
     dum <- rbind(dum,
                  dum3*b3*20 
     )
@@ -1374,6 +1363,7 @@ sdl <- function(
   res$fit[match(daest,index(res$fit)),1] <- yx[daest,1] #bug in [<-.zoo so workaround with match
   res
 }
+
 #sdlcurv - finite difference curvature
 #' @export
 sdlcurv <- function(nn)
@@ -1387,27 +1377,31 @@ sdlcurv <- function(nn)
   dum[ij] <- 1
   dum
 }
-#folagpad - lag a single column zoo without losing data, output has k additional rows which contain NA, nb lag direction is as for lag()
 #' @export
-folagpad <- function(
+offda.sdl <- function(x,                      #dateseries
+                      lags=0,                     #lagrange
+                      withinsequence=ca)  #assumed this exists as a global
+{
+  i <- match(as.Date(x),as.Date(withinsequence))
+  ilag <- outer(i,lags,"+")
+  ii <- unique(as.integer(ilag))
+  iii <- ii[ii %in% seq_along(withinsequence)] 
+  sort(withinsequence[iii]) 
+}
+
+#' @export
+folagpad.sdl <- function(
   x,      #zoo
-  k,      #lags
-  pad=TRUE
+  k
 )
 {
-  #stopifnot(length(k)>=1 && valla(k))
-  #stopifnot( iz(x) && ncol(x)==1 )
   d1 <- min(index(x))
   d2 <- max(index(x))
-  if(pad) {
-    mydates <- as.Date(extrca(offda(x=d1,lags=-max(c(k,0))),offda(x=d2,lags=-min(c(k,0)))))
-  } else {
-    mydates <- index(x)
-  }
-  #stopifnot(all(mydates%in%as.Date(getca())))
-  res <- lags(as.numeric(coredata(x)),k,pad=pad)
+  mydates <- as.Date(aautil::extrca( aautil::offda.sdl(x=d1,lags=-max(c(k,0))) ,aautil::offda.sdl(x=d2,lags=-min(c(k,0)))))
+  res <- aa0::lags(as.numeric(coredata(x)),k,pad=TRUE)
   zoo(res,mydates)
 }
+
 #wls - weighted least squares for use in sdl, allows bayesian mod to xx
 #' @export
 wls <- function(yx,w=rep(1,nrow(yx)),rr=NULL)
@@ -1636,3 +1630,25 @@ zm <- function(z) {
   rownames(z) <- as.character(index(z))
   z
 }
+
+#' @export
+latotxt <-
+  function(la) 
+  {
+    mysign <- sign(la)
+    latext <- as.character(abs(la))
+    minus <- la<=0
+    latext[minus] <- psz("minus",latext[minus])
+    latext[!minus] <- psz("plus",latext[!minus])
+    latext
+  }
+
+#' @export
+txttola <-
+  function(x=dirfld("cala")) 
+  {
+    x <- union(x[grep(patt="^minus",x)],x[grep(patt="^plus",x)])
+    x <- gsub(patt="minus",rep="-",x=x)
+    x <- gsub(patt="plus",rep="",x=x)
+    as.integer(x)
+  }
