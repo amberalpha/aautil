@@ -1652,3 +1652,29 @@ txttola <-
     x <- gsub(patt="plus",rep="",x=x)
     as.integer(x)
   }
+
+
+#' @export
+lags <-
+  function(x,           #vector, mode preserved in output
+           la=0,           #lagseries
+           pad=FALSE)      #flag to retain rows where x is NA
+  {
+    x <- x[seq_along(x)]
+    la0 <- sort(union(la,0))
+    o1 <- max(la0)
+    o2 <- min(la0)
+    oo <- o1-o2
+    suppressWarnings(z <- matrix(data=c(x,rep(NA,1+oo)), # the warnings arise from the data being nrows+1 in length, which is deliberate
+                                 nrow=(length(x)+oo),
+                                 ncol=oo+1,
+                                 dimnames=list(NULL,latotxt(o1:o2))))
+    if(pad) {
+      i <- 1:nrow(z)
+    } else {
+      i <- which(!is.na(z[,latotxt(0)]))
+    }
+    res <- z[i,latotxt(la),drop=FALSE]
+    rownames(res) <- as.character(z[i,latotxt(0),drop=FALSE])
+    res
+  }
