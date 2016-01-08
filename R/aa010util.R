@@ -1398,7 +1398,7 @@ folagpad.sdl <- function(
   d1 <- min(index(x))
   d2 <- max(index(x))
   mydates <- as.Date(aautil::extrca( aautil::offda.sdl(x=d1,lags=-max(c(k,0))) ,aautil::offda.sdl(x=d2,lags=-min(c(k,0)))))
-  res <- aa0::lags(as.numeric(coredata(x)),k,pad=TRUE)
+  res <- aautil::lags(as.numeric(coredata(x)),k,pad=TRUE)
   zoo(res,mydates)
 }
 
