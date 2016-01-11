@@ -128,12 +128,17 @@ badrd <- function() {
 #' getrdatv(app='myapp',type='testdata',ver=1)
 #' }
 putrdatv <- function(x,app=getv()$app,type=getv()$type,ver=getv()$ver,i = idxrd() + 1,over=TRUE) {
-  ii <- greprdatv(app=app,typ=type,ver=ver)
-  if((0<length(ii)) & over) {
-    i <- max(ii)
-    delrd(i=ii)
+  if(exists('.memonly')&&.memonly) { #memonly option puts them in .rdenv
+    desc <- descrdatv(app=app,typ=type,ver=ver)#app,type,ver
+    assign(x=desc,value=x,envir=.rdenv) #instead of write
+  } else {
+    ii <- greprdatv(app=app,typ=type,ver=ver)
+    if((0<length(ii)) & over) {
+      i <- max(ii)
+      delrd(i=ii)
+    }
+    putrd(x,desc=paste0('app',app,'type',type,'ver',ver),i=i)
   }
-  putrd(x,desc=paste0('app',app,'type',type,'ver',ver),i=i)
 }
 #' get using structured description
 #'
@@ -151,11 +156,25 @@ putrdatv <- function(x,app=getv()$app,type=getv()$type,ver=getv()$ver,i = idxrd(
 #' getrdatv(app='myapp',type='testdata',ver=1)
 #' }
 getrdatv <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) {
-  ird <- greprdatv(app,type,ver)
-  if(0==length(ird)) return()
-  getrd(max(ird))
+  if(exists('.memonly')&&.memonly) { #these have been loaded into .rdenv in setv()
+    desc <- descrdatv(app=app,typ=type,ver=ver)#app,type,ver
+    if(!(desc %in% ls(envir=.rdenv)))  return()
+    get(desc,envir=.rdenv) #instead of read
+  } else {
+    ird <- greprdatv(app,type,ver)
+    if(0==length(ird)) return()
+    getrd(max(ird))
+  }
 }
 
+#' @export
+memrdatv <- function(memuse=FALSE,winenable=FALSE) { #only applies to rdatv,gett,putt
+  if( (Sys.info()['sysname']!='Windows') | winenable |  !memuse) {
+   .memonly <<- memuse
+  } else{
+   print('disabled by default on Windows')
+  }
+}
 
 #' @export
 gett <- function(ty) {getrdatv(ty=ty)} #this should be same as other copies and put in util
@@ -202,9 +221,13 @@ descrdatv <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) {
 }
 
 #' @export
-ddv <- function(ver=getv()$ver,app=getv()$app) { #return all dd matching app,ver
-  dd <- dirrd()
-  dd[grep(paste0('^app',app,'type.+ver',ver,'$'),des)]
+ddv <- function(ver=getv()$ver,app=getv()$app,ondisk=FALSE) { #return all dd matching app,ver
+  if( exists('.rdenv')&&is.environment(.rdenv)&&exists('.memonly')&&.memonly&&!ondisk ) {
+    ls(envir=.rdenv)
+  } else {
+    dd <- dirrd()
+    dd[grep(paste0('^app',app,'type.+ver',ver,'$'),des)]
+  }
 }
 
 #' @export
@@ -248,6 +271,16 @@ putv <- function(app="jo",type="x",ver=1) {
 #' @export
 setv <- function(app=getv()$app, type=getv()$type, ver=getv()$ver) {
   ver.g <<- list(app=app,type=type,ver=ver)
+  if(exists('.memonly')&&.memonly) { #if .memonly, use .rdenv not filesystem
+    #exists('.rdenv')&&is.environment(.rdenv)
+    dd <- ddv(ondisk=T)
+    .rdenv <<- new.env() #nb any saved work lost on second setv
+    for(i in  seq_along(dd[,num])) { 
+      print(dd[i,des])
+      print(length(getrd(as.numeric(dd[i,as.numeric(num)]))))
+      assign(x=dd[i,des],value=getrd(as.numeric(dd[i,as.numeric(num)])),envir=.rdenv) 
+    }
+  }
 }
 
 

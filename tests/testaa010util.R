@@ -55,7 +55,27 @@ if(irdend>irdstart) {
   delrd((irdstart+1):irdend)
 }
 
-#expect_true(F)
+#memonly parts
+memrdatv(F)
+dirrd()
+setv(app='test',v=1,type='tttp')
+ttyp1 <- letters
+putt(ttyp1)
+ttyp2 <- LETTERS
+putt(ttyp2)
+ddv()
+memrdatv(T,T)
+setv(app='test',v=1,type='ttyp1')
+expect_identical(getrdatv(),ttyp1)
+expect_identical(gett('ttyp1'),ttyp1)
+expect_identical(getrdatv(ty='ttyp2'),ttyp2)
+expect_identical(gett('ttyp2'),ttyp2)
+putrdatv(123,ty='ttyp1')
+expect_identical(getrdatv(ty='ttyp1'),123)
+expect_identical(gett('ttyp1'),123)
+memrdatv(F)
+delrd(greprdatv(ty='ttyp1'))
+delrd(greprdatv(ty='ttyp2'))
 
 
 if(FALSE) {
