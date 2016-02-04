@@ -1477,6 +1477,18 @@ deploydata <- function(vin=getv()$ver,vout=nextv(),type=v2deploydata()) {
   }
 }
 
+#' @export
+deploydata2 <- function (vin = getv()$ver) #this version copies the whole ver to one with 0 appended
+{
+  stopifnot(!is.na(vin) && length(vin) == 1)
+  ddv1 <- ddv(vin)
+  for (i in seq_along(ddv1[,num])) {
+    x <- getrd(ddv1[i,as.numeric(num)])
+    stopifnot(!is.na(x) && !is.null(x))
+    putrd(x, des=ddv1[i,paste0(des,'0')],use=T)
+  }
+}
+
 #multivariate prior: returns the pattern matrix R and tightness dpn for mixe()
 #' @export
 mvp <- function(
@@ -1711,3 +1723,6 @@ lags <-
     rownames(res) <- as.character(z[i,latotxt(0),drop=FALSE])
     res
   }
+
+
+
