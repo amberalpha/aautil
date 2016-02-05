@@ -89,6 +89,7 @@ putrd <- function(x, desc = deparse(substitute(x)), i = idxrd() + 1,usedesc=FALS
     }
 }
 
+
 #' descrd
 #'
 #' directory entry for index i
@@ -1474,6 +1475,16 @@ deploydata <- function(vin=getv()$ver,vout=nextv(),type=v2deploydata()) {
     stopifnot(!is.na(x) && !is.null(x)) #input exists
     stopifnot(is.null(getrdatv(v=vout,type=type[i]))) #no overwrite
     putrdatv(x,v=vout,type=type[i])
+  }
+}
+
+#' @export
+moverd <- function(vout=nextv()-1) { #moves a single version down one level in tree
+  allfnam <- dir(paste0(rdroot(),'/rd'))
+  fnam <- allfnam[grep(paste0(patt='.?ver',vout,'.RData'),allfnam)]
+  for(i in seq_along(fnam)) {
+    cmd <- paste0('mv ../rd/',fnam[i],' ./rd/',fnam[i])
+    shell(cmd)
   }
 }
 
