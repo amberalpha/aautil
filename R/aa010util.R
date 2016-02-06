@@ -243,8 +243,13 @@ ddv1 <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) { #return all d
 }
 
 #' @export
+dirv <- function(app=getv()$app) { #return all dd matching app,ver
+  sort(unique(suppressWarnings(as.numeric(as.matrix(dirrd()[grep(paste0('^app',app),des),strsplit(des,'ver')][2,])))))
+}
+
+#' @export
 nextv <- function(app=getv()$app) { #return all dd matching app,ver
-  suppressWarnings(max(c(0,as.numeric(as.matrix(dirrd()[grep(paste0('^app',app),des),strsplit(des,'ver')][2,]))),na.rm=T)+1)
+  suppressWarnings(max(c(0,dirv(app=app),na.rm=T)+1))
 }
 
 
@@ -1483,7 +1488,7 @@ moverd <- function(vout=nextv()-1) { #moves a single version down one level in t
   allfnam <- dir(paste0(rdroot(),'/rd'))
   fnam <- allfnam[grep(paste0(patt='.?ver',vout,'.RData'),allfnam)]
   for(i in seq_along(fnam)) {
-    cmd <- paste0('mv ../rd/',fnam[i],' ./rd/',fnam[i])
+    cmd <- paste0('cp ../rd/',fnam[i],' ./rd/',fnam[i])
     shell(cmd)
   }
 }
