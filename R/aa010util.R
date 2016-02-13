@@ -1746,3 +1746,5 @@ lags <-
 
 
 
+#' @export
+sr <- function(x) {mean(x,na.rm=T)/sd(x,na.rm=T)}
