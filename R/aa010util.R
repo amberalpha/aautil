@@ -1454,9 +1454,11 @@ wls <- function(yx,w=rep(1,nrow(yx)),rr=NULL)
   yvar <- cov.wt(y,wt=w,meth="ML")$cov[1,1,drop=TRUE]
   residvar <- cov.wt(y-x%*%co,wt=w,meth="ML")$cov[1,1,drop=TRUE]
   r.squared <- 1-residvar/yvar
+  coef <- t(co)
+  colnames(coef)[1] <- 'const'
   list(
-    coef=t(co),
-    r.squared=r.squared
+    coef=coef,
+    r.squared=matrix(r.squared,dimnames=list(NULL,'r.squared'))
   )
 }
 
@@ -1477,8 +1479,10 @@ deploydata <- function(vin=getv()$ver,vout=nextv(),type=v2deploydata()) {
   for(i in seq_along(type)) {
     print(type[i])
     x <- getrdatv(type=type[i],v=vin)
-    stopifnot(!is.na(x) && !is.null(x)) #input exists
-    stopifnot(is.null(getrdatv(v=vout,type=type[i]))) #no overwrite
+    if(!is.null(x)) { #do safety checks
+      stopifnot(!is.na(x) && !is.null(x)) #input exists
+      stopifnot(is.null(getrdatv(v=vout,type=type[i]))) #no overwrite
+    }
     putrdatv(x,v=vout,type=type[i])
   }
 }
