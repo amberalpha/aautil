@@ -1696,12 +1696,14 @@ zm <- function(z) {
   z
 }
 
+#note that sorting these will reverse order if negatives
 #' @export
 latotxt <-
-  function(la) 
+  function(la,nchar=4) 
   {
     mysign <- sign(la)
-    latext <- as.character(abs(la))
+#    latext <- as.character(abs(la))
+    latext <- zeroprepend(abs(la),nchar)
     minus <- la<=0
     latext[minus] <- psz("minus",latext[minus])
     latext[!minus] <- psz("plus",latext[!minus])
@@ -1712,7 +1714,8 @@ latotxt <-
 txttola <-
   function(x=dirfld("cala")) 
   {
-    x <- union(x[grep(patt="^minus",x)],x[grep(patt="^plus",x)])
+#    x <- union(x[grep(patt="^minus",x)],x[grep(patt="^plus",x)])
+    x <- c(x[grep(patt="^minus",x)],x[grep(patt="^plus",x)])
     x <- gsub(patt="minus",rep="-",x=x)
     x <- gsub(patt="plus",rep="",x=x)
     as.integer(x)
