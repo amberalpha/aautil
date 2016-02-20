@@ -712,7 +712,7 @@ offda <- function(x = ca[, max(date)], lags = -20:0) {
 #' @export
 dttozoo <- function(dt = cart()[, `:=`(x, 1:.N)], value.var = "x") {
     x <- dcast.data.table(dt[, c("bui", "date", value.var), with = FALSE], date ~ bui, value.var = value.var)
-    zoo(as.matrix(x[, -1, with = FALSE]), as.Date(x[, date]))
+    zm(zoo(as.matrix(x[, -1, with = FALSE]), as.Date(x[, date])))
 }
 
 #' @export
