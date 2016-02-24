@@ -244,7 +244,9 @@ ddv1 <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) { #return all d
 
 #' @export
 dirv <- function(app=getv()$app) { #return all dd matching app,ver
-  sort(unique(suppressWarnings(as.numeric(as.matrix(dirrd()[grep(paste0('^app',app),des),strsplit(des,'ver')][2,])))))
+  x <- dirrd()[grep(paste0('^app',app),des),]
+  if(nrow(x)==0) return(NULL)
+  sort(unique(suppressWarnings(as.numeric(as.matrix(x[,strsplit(des,'ver')][2,])))))
 }
 
 #' @export
@@ -1488,7 +1490,7 @@ deploydata <- function(vin=getv()$ver,vout=nextv(),type=v2deploydata()) {
 }
 
 #' @export
-moverd <- function(vout=nextv()-1) { #moves a single version down one level in tree
+copydown <- function(vout=nextv()-1) { #copies a single version down one level in tree
   allfnam <- dir(paste0(rdroot(),'/rd'))
   fnam <- allfnam[grep(paste0(patt='.?ver',vout,'.RData'),allfnam)]
   for(i in seq_along(fnam)) {
@@ -1497,17 +1499,17 @@ moverd <- function(vout=nextv()-1) { #moves a single version down one level in t
   }
 }
 
-#' @export
-deploydata2 <- function (vin = getv()$ver) #this version copies the whole ver to one with 0 appended
-{
-  stopifnot(!is.na(vin) && length(vin) == 1)
-  ddv1 <- ddv(vin)
-  for (i in seq_along(ddv1[,num])) {
-    x <- getrd(ddv1[i,as.numeric(num)])
-    stopifnot(!is.na(x) && !is.null(x))
-    putrd(x, des=ddv1[i,paste0(des,'0')],use=T)
-  }
-}
+# #' @export
+# deploydata2 <- function (vin = getv()$ver) #this version copies the whole ver to one with 0 appended
+# {
+#   stopifnot(!is.na(vin) && length(vin) == 1)
+#   ddv1 <- ddv(vin)
+#   for (i in seq_along(ddv1[,num])) {
+#     x <- getrd(ddv1[i,as.numeric(num)])
+#     stopifnot(!is.na(x) && !is.null(x))
+#     putrd(x, des=ddv1[i,paste0(des,'0')],use=T)
+#   }
+# }
 
 #multivariate prior: returns the pattern matrix R and tightness dpn for mixe()
 #' @export
