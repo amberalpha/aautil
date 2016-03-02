@@ -216,3 +216,21 @@ if(F) {  #here the data is synthesised using an ma model
   barplot(co[[1]][,1])
 }
 
+if(F) { #informal tests for revised lags() 2016-03-02
+  require(zoo)
+  x <- matrix(c(rep(NA,5),6:10,rep(NA,5)),dimnames=list(as.character(1:15),'x'))
+  lags(x,la=-1:1,pad=F) #wrong, takes out all NA ie is data-dependent
+  lags(x,la=-1:1,pad=T) #
+  dimnames(x)
+  x
+  
+  x <- matrix(1:15,dimnames=list(as.character(1:15),'x'))
+  lags(x,la=-1:1,pad=F) #correct, retains input range, pads with NA
+  lags(x,la=-1:1,pad=T) #correct, extends input range so all possible range exists, but without 
+  
+  x <- matrix(c(1:9,NA,11:15),dimnames=list(as.character(1:15),'x'))
+  lags(x,la=-1:1,pad=F) #wrong, drops a row
+  lags(x,la=-1:1,pad=T) #correct, extends input range so all possible range exists, but without 
+  
+  lags(x,-20:-22,pad=T)
+}

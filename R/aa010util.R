@@ -1482,7 +1482,7 @@ deploydata <- function(vin=getv()$ver,vout=nextv(),type=v2deploydata()) {
     print(type[i])
     x <- getrdatv(type=type[i],v=vin)
     if(!is.null(x)) { #do safety checks
-      stopifnot(!is.na(x) && !is.null(x)) #input exists
+      stopifnot(!is.null(x)) #input exists
       stopifnot(is.null(getrdatv(v=vout,type=type[i]))) #no overwrite
     }
     putrdatv(x,v=vout,type=type[i])
@@ -1730,6 +1730,12 @@ lags <-
            la=0,           #lagseries
            pad=FALSE)      #flag to retain rows where x is NA
   {
+    nn <- NULL
+    if(is.matrix(x)) {
+      nn <- rownames(x)
+    } else if(!is.null(names(x))) {
+      nn <- names(x)
+    }
     x <- x[seq_along(x)]
     la0 <- sort(union(la,0))
     o1 <- max(la0)
@@ -1738,15 +1744,13 @@ lags <-
     suppressWarnings(z <- matrix(data=c(x,rep(NA,1+oo)), # the warnings arise from the data being nrows+1 in length, which is deliberate
                                  nrow=(length(x)+oo),
                                  ncol=oo+1,
-                                 dimnames=list(NULL,latotxt(o1:o2))))
-    if(pad) {
-      i <- 1:nrow(z)
-    } else {
-      i <- which(!is.na(z[,latotxt(0)]))
-    }
-    res <- z[i,latotxt(la),drop=FALSE]
-    rownames(res) <- as.character(z[i,latotxt(0),drop=FALSE])
-    res
+                                 dimnames=list(rep('pad',length(x)+oo),latotxt(o1:o2))))
+    i1 <- o1+1
+    i2 <- o2+nrow(z)
+    i <- i1:i2 #rows in z corresponding to lag 0
+    rownames(z)[i] <- nn
+    if(pad) { i <- 1:nrow(z) }
+    z[i,latotxt(la),drop=FALSE]
   }
 
 
