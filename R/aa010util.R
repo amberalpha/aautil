@@ -138,7 +138,8 @@ putrdatv <- function(x,app=getv()$app,type=getv()$type,ver=getv()$ver,i = idxrd(
       i <- max(ii)
       delrd(i=ii)
     }
-    putrd(x,desc=paste0('app',app,'type',type,'ver',ver),i=i)
+    #putrd(x,desc=paste0('app',app,'type',type,'ver',ver),i=i)
+    putrd(x,desc=descrdatv(app,type,ver),i=i)
   }
 }
 #' get using structured description
@@ -201,7 +202,25 @@ putt <- function(x,ty=deparse(substitute(x)),save=T) {
 #' }
 greprdatv <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) {
   dd <- dirrd()
-  dd[grepl(descrdatv(app,type,ver), dirrd()[, des]), as.numeric(num)]
+  dd[grepl(descrdatv(app,type,ver), dirrd()[, des]), prependrdatv(as.numeric(num))]
+}
+
+
+#' @export
+convrdatv <- function(myrd=rdroot()) {
+  x<-dirrd()[grepl(patt='^app.+type.+ver',x=des)]
+  fnam <- dir(paste0(rdroot(),'/rd/'))
+  for(i in 1:nrow(x)) {
+    x[i,fn:=fnam[grepl(patt=des,x=fnam)]]
+  }
+  ff <- function(x) {unlist(lapply(strsplit(x,split='ver'),function(xx){paste0(xx[1],'ver',prependrdatv(substr(xx[2],1,nchar(xx[2])-6)),'.Rdata')}))}
+  x[,newname:=ff(fn)]
+  for(i in 1:nrow(x)) {
+    cmd <- paste0('ren ',rdroot(),'/rd/',x[i,fn],' ',x[i,newname])
+    cmd <- gsub(cmd,pat='/',rep='\\\\')
+    shell(cmd)
+  }
+  
 }
 
 #' @export
@@ -218,8 +237,12 @@ numtotxt <- function(i) {
 #' @keywords data
 #' @export
 descrdatv <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) {
-  paste0('app',app,'type',abbrev(type),'ver',ver)
+  paste0('app',app,'type',abbrev(type),'ver',prependrdatv(ver))
 }
+
+#utility: defines the prepend length
+#' @export
+prependrdatv <- function(ver=1,len=5) {zeroprepend(ver,len)} 
 
 #' @export
 ddv <- function(ver=getv()$ver,app=getv()$app,ondisk=FALSE) { #return all dd matching app,ver
@@ -227,7 +250,7 @@ ddv <- function(ver=getv()$ver,app=getv()$app,ondisk=FALSE) { #return all dd mat
     ls(envir=.rdenv)
   } else {
     dd <- dirrd()
-    dd[grep(paste0('^app',app,'type.+ver',ver,'$'),des)]
+    dd[grep(paste0('^app',app,'type.+ver',prependrdatv(ver),'$'),des)]
   }
 }
 
@@ -235,7 +258,7 @@ ddv <- function(ver=getv()$ver,app=getv()$app,ondisk=FALSE) { #return all dd mat
 ddv1 <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) { #return all dd matching app,ver
   dd <- dirrd()[!is.na(des)]
   subg <- function(x){ifelse(x=='*','.+',x)}
-  ver <- paste0(subg(ver),'$')
+  ver <- paste0(prependrdatv(subg(ver)),'$')
   app <- subg(app)
   type <- subg(type)
   i <- greprd(perl=T,patt=paste(paste(c('app','type','ver'),c(app,type,ver),sep=''),collapse=''),dirrd()[,des])
@@ -384,7 +407,8 @@ idxrd <- function() {
 #' delrd()
 # delrd
 delrd <- function(i = idxrd()) {
-    if (length(i)==1 && i == 0) 
+  i <- as.numeric(i)  
+  if (length(i)==1 && i == 0) 
         return()
     i <- intersect(i,dirrd()[,as.numeric(num)])
     for(j in seq_along(i)) {
@@ -1445,23 +1469,34 @@ folagpad.sdl <- function(
 
 #wls - weighted least squares for use in sdl, allows bayesian mod to xx
 #' @export
-wls <- function(yx,w=rep(1,nrow(yx)),rr=NULL)
+wls0 <- function(yx,w=rep(1,nrow(yx)),rr=NULL)
 {
   if(is.null(rr)) rr <- matrix(0,ncol(yx)-1,ncol(yx)-1)
   rr <- rbind(0,cbind(0,rr))
   y <- yx[,1,drop=FALSE]
   x <- cbind(1,yx[,-1,drop=FALSE])
   xwgt <- sweep(x,MARGIN=1,STATS=w,FUN="*")
-  co <- solve(t(xwgt)%*%x + rr) %*% t(xwgt)%*%y
+  xxinv <- solve(t(xwgt)%*%x + rr)
+  co <- xxinv %*% t(xwgt)%*%y
   yvar <- cov.wt(y,wt=w,meth="ML")$cov[1,1,drop=TRUE]
   residvar <- cov.wt(y-x%*%co,wt=w,meth="ML")$cov[1,1,drop=TRUE]
   r.squared <- 1-residvar/yvar
   coef <- t(co)
+  vcv <- residvar*xxinv
   colnames(coef)[1] <- 'const'
   list(
     coef=coef,
-    r.squared=matrix(r.squared,dimnames=list(NULL,'r.squared'))
+    r.squared=matrix(r.squared,dimnames=list(NULL,'r.squared')),
+    residvar=residvar,
+    vcv=vcv
   )
+}
+
+#reduced outputs, kept for backward compatibility
+#' @export
+wls <- function(yx,w=rep(1,nrow(yx)),rr=NULL)
+{
+  wls0(yx,w=rep(1,nrow(yx)),rr=NULL)[c('coef','r.squared')]
 }
 
 #' @export
@@ -1491,6 +1526,7 @@ deploydata <- function(vin=getv()$ver,vout=nextv(),type=v2deploydata()) {
 
 #' @export
 copydown <- function(vout=nextv()-1) { #copies a single version down one level in tree
+  vout <- prependrdatv(vout)
   allfnam <- dir(paste0(rdroot(),'/rd'))
   fnam <- allfnam[grep(paste0(patt='.?ver',vout,'.RData'),allfnam)]
   for(i in seq_along(fnam)) {
@@ -1747,9 +1783,9 @@ lags <-
                                  dimnames=list(rep('pad',length(x)+oo),latotxt(o1:o2))))
     i1 <- o1+1
     i2 <- o2+nrow(z)
-    i <- i1:i2 #rows in z corresponding to lag 0
-    rownames(z)[i] <- nn
-    if(pad) { i <- 1:nrow(z) }
+    i <- i1:i2 #rows in z corresponding to lag 0...
+    if(!is.null(nn)) { rownames(z)[i] <- nn } #label these...
+    if(pad) { i <- 1:nrow(z) } #for the padded case, return the whole lot
     z[i,latotxt(la),drop=FALSE]
   }
 
