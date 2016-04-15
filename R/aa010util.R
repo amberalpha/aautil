@@ -1737,14 +1737,14 @@ zm <- function(z) {
 #note that sorting these will reverse order if negatives
 #' @export
 latotxt <-
-  function(la,nchar=4) 
+  function(la,nchar=4,minustext='minus',plustext='plus') 
   {
     mysign <- sign(la)
 #    latext <- as.character(abs(la))
     latext <- zeroprepend(abs(la),nchar)
     minus <- la<=0
-    latext[minus] <- psz("minus",latext[minus])
-    latext[!minus] <- psz("plus",latext[!minus])
+    latext[minus] <- psz(minustext,latext[minus])
+    latext[!minus] <- psz(plustext,latext[!minus])
     latext
   }
 
