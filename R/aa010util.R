@@ -1737,26 +1737,27 @@ zm <- function(z) {
 #note that sorting these will reverse order if negatives
 #' @export
 latotxt <-
-  function(la,nchar=4) 
+  function(la,nchar=4,minustext='minus',plustext='plus',pretext='') 
   {
     mysign <- sign(la)
 #    latext <- as.character(abs(la))
     latext <- zeroprepend(abs(la),nchar)
     minus <- la<=0
-    latext[minus] <- psz("minus",latext[minus])
-    latext[!minus] <- psz("plus",latext[!minus])
+    latext[minus] <- psz(minustext,latext[minus])
+    latext[!minus] <- psz(plustext,latext[!minus])
+    latext <- paste0(pretext,latext)
     latext
   }
 
 #' @export
 txttola <-
-  function(x=dirfld("cala")) 
+  function(x=dirfld("cala"),minustext='minus',plustext='plus',pretext='') 
   {
 #    x <- union(x[grep(patt="^minus",x)],x[grep(patt="^plus",x)])
-    x <- c(x[grep(patt="^minus",x)],x[grep(patt="^plus",x)])
-    x <- gsub(patt="minus",rep="-",x=x)
-    x <- gsub(patt="plus",rep="",x=x)
-    as.integer(x)
+    x <- c(x[grep(patt=paste0("^",pretext,minustext),x)],x[grep(patt=paste0("^",pretext,plustext),x)])
+    x <- gsub(patt=paste0("^",pretext,minustext),rep="-",x=x)
+    x <- gsub(patt=paste0("^",pretext,plustext),rep="",x=x)
+    as.integer(x) 
   }
 
 
