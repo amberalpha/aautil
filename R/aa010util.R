@@ -1700,7 +1700,7 @@ endtime <- function(typex='x') {
   timed <- gett('timed')
   if(is.null(timed)) return(NULL)
   timed[type==typex,end:=Sys.time()]
-  timed[,hrs:=round(as.numeric(end-start)/3600,2)]
+  timed[,secs:=round(as.numeric(end-start),1)]
   setkey(timed,start)
   putt(timed)
 }
