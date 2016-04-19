@@ -1690,7 +1690,7 @@ newtime <- function(){putrdatv(NULL,ty='timed')}
 starttime <- function(typex='x') {
   oldtimed <- gett('timed')
   if(!is.null(oldtimed)) oldtimed <- oldtimed[type!=typex]
-  timed <- cbind(as.data.table(getv()),data.table(start=Sys.time(),end=Sys.time(),hrs=0L))[,type:=typex]
+  timed <- cbind(as.data.table(getv()),data.table(start=Sys.time(),end=Sys.time(),secs=0L))[,type:=typex]
   timed <- setkey(rbind(oldtimed,timed),type)
   putt(timed)
 }
