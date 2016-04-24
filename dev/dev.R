@@ -39,13 +39,15 @@ optimise(f=wls0b,int=c(0,1),yx=yx,rr=rr,tol=1e-6,fold=fold)$minimum < 1e-6
 
 ###############################################################################
 #recursive filter now, apply linear filter
-p <- 10 #p, lags in AC
+kfold <- 10
+p <- 30 #p, lags in AC
 x <- rnorm(1000+p)
-ff <- (1:p)
-ff <- .2*ff/sum(ff)
+#ff <- (1:p)*(p:1)
+ff <- p:1
+ff <- .3*ff/sum(ff)
 y <- filter(x,ff,sides=1,meth='rec') #+rnorm(1000)/1e2 #recursive
 yx <- matrix(lagf(y,p),1000,p+1,dimnames=list(1:1000,1:(p+1)))  #this is just assigning dimnames
-rr <- sdl2Fun(yx,la=-(p:1),b1=0,b2=0,bb=1)
+rr <- sdl2Fun(yx,la=-(p:1),b1=0,b2=1,bb=1)
 
 par(mfrow=c(1,1))
 plot(as.zoo(yx[,1]))
@@ -60,7 +62,7 @@ sol$r.squared<1-1e-3
 expect_lt(wls0b(b=1e-10,yx=yx,rr0=rr)-wls0b(b=0,yx=yx,rr0=rr*0),-1e-15)
 
 #to show that optimise estimates b>0
-fold <- folder(nrow(yx),20,meth='ran')
+fold <- folder(nrow(yx),kfold,meth='ran')
 oo <- optimise(f=wls0b,int=c(0,1e3),yx=yx,rr=rr,tol=1e-10,fold=fold)
 oo$minimum
 wwb <- wls0(yx=yx,rr=rr*oo$minimum)
@@ -75,6 +77,10 @@ barplot(ccb,main=paste0('r2=',round(wwb$r.squared,4)),ylim=c(0,ffmax))
 barplot(cc0,main=paste0('r2=',round(ww0$r.squared,4)),ylim=c(0,ffmax))
 
 #got this far - broadly works but many concerns esp with noisy regressors
+
+
+
+
 
 ####from here on may no longer work
 
