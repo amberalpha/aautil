@@ -1492,6 +1492,35 @@ wls0 <- function(yx,w=rep(1,nrow(yx)),rr=NULL)
   )
 }
 
+#generate matrix with lags of x: only the non-na rows returned; 1st row is tau=0 and starts at i=taufa+1
+#' @export
+lagf <- function(x=1:10,taufa=5) {
+  stopifnot(taufa>=0 && taufa<length(x))
+  if(taufa==0) return(as.matrix(x))
+  tauco <- length(x)-1
+  res <- suppressWarnings(matrix(rep(c(x,rep(NA,taufa)),taufa+1),tauco+taufa,taufa+1))[(taufa:tauco)+1,,drop=F]
+  res
+}
+
+#mse(b) univariate, loocv, for numerical minimisation of overall bayes using optimise()
+#' @export
+wls0b <- function(b,yx,rr0,w=rep(1,nrow(yx)))
+{
+  rr <- rbind(0,cbind(0,rr0*b))
+  y <- yx[,1,drop=FALSE]
+  x <- cbind(1,yx[,-1,drop=FALSE])
+  xwgt <- sweep(x,MARGIN=1,STATS=w,FUN="*")
+  re <- y*0
+  for(i in 1:length(y)) {
+    iout <- (1:length(y))==i
+    xxinv <- solve(t(xwgt[!iout,,drop=F])%*%x[!iout,,drop=F] + rr)#in
+    co <- xxinv %*% t(xwgt[!iout,])%*%y[!iout,,drop=F]#in
+    re[i] <- y[iout,,drop=F]-x[iout,,drop=F]%*%co
+  }
+  (length(y)-1)*cov.wt(re,wt=w,meth="unb",center=F)$cov[1,1,drop=TRUE]
+}
+
+
 #reduced outputs, kept for backward compatibility
 #' @export
 wls <- function(yx,w=rep(1,nrow(yx)),rr=NULL)
