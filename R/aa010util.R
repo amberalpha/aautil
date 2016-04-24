@@ -1504,22 +1504,54 @@ lagf <- function(x=1:10,taufa=5) {
 
 #mse(b) univariate, loocv, for numerical minimisation of overall bayes using optimise()
 #' @export
-wls0b <- function(b,yx,rr0,w=rep(1,nrow(yx)))
+wls0b <- function(b,yx,w=rep(1,nrow(yx)),rr0,nfold=10,fold=folder(nrow(yx),nfold))
 {
+  nfold <- min(nfold,nrow(yx))
+  stopifnot(is.factor(fold) && length(fold)==nrow(yx))
+  stopifnot(length(w)==nrow(yx))
   rr <- rbind(0,cbind(0,rr0*b))
   y <- yx[,1,drop=FALSE]
   x <- cbind(1,yx[,-1,drop=FALSE])
   xwgt <- sweep(x,MARGIN=1,STATS=w,FUN="*")
-  re <- y*0
-  for(i in 1:length(y)) {
-    iout <- (1:length(y))==i
+  re <- y*NA
+  for(i in 1:length(levels(fold))) {
+    iout <- fold==levels(fold)[i]
     xxinv <- solve(t(xwgt[!iout,,drop=F])%*%x[!iout,,drop=F] + rr)#in
     co <- xxinv %*% t(xwgt[!iout,])%*%y[!iout,,drop=F]#in
-    re[i] <- y[iout,,drop=F]-x[iout,,drop=F]%*%co
+    re[iout] <- y[iout,,drop=F]-x[iout,,drop=F]%*%co
   }
   (length(y)-1)*cov.wt(re,wt=w,meth="unb",center=F)$cov[1,1,drop=TRUE]
 }
 
+#factor levels define lev folds of a length len
+#' @export
+folder <- function(len=100,lev=10,method=c('cycle','random')) {
+  method <- match.arg(method)
+  if(method=='cycle') {
+    as.factor(rep(1:lev,length=len))
+  } else {
+    as.factor(sample(1:lev,len,rep=T))
+  }
+}
+#
+
+#' #mse(b) univariate, loocv, for numerical minimisation of overall bayes using optimise()
+#' #' @export
+#' wls0b <- function(b,yx,w=rep(1,nrow(yx)),rr0,nfold=10,fold=as.factor(sample(nfold,nrow(yx),rep=T)))
+#' {
+#'   rr <- rbind(0,cbind(0,rr0*b))
+#'   y <- yx[,1,drop=FALSE]
+#'   x <- cbind(1,yx[,-1,drop=FALSE])
+#'   xwgt <- sweep(x,MARGIN=1,STATS=w,FUN="*")
+#'   re <- y*0
+#'   for(i in 1:length(y)) {
+#'     iout <- (1:length(y))==i
+#'     xxinv <- solve(t(xwgt[!iout,,drop=F])%*%x[!iout,,drop=F] + rr)#in
+#'     co <- xxinv %*% t(xwgt[!iout,])%*%y[!iout,,drop=F]#in
+#'     re[i] <- y[iout,,drop=F]-x[iout,,drop=F]%*%co
+#'   }
+#'   (length(y)-1)*cov.wt(re,wt=w,meth="unb",center=F)$cov[1,1,drop=TRUE]
+#' }
 
 #reduced outputs, kept for backward compatibility
 #' @export
