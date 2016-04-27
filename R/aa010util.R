@@ -19,7 +19,7 @@ rdroot <- function() {
 # abbrev - abbreviate and remove forbidden characters
 #' @export
 abbrev <- function(x, len = 30, rep = "", patt = list("\\.", "/", "&", "\\*", ":",","), nospace = TRUE) {
-    if (nospace) 
+    if (nospace)
         patt <- union(patt, " ")
     x <- abbreviate(x, minl = len)
     for (i in 1:length(patt)) x <- gsub(x = x, patt = patt[i], rep = rep)
@@ -29,12 +29,12 @@ abbrev <- function(x, len = 30, rep = "", patt = list("\\.", "/", "&", "\\*", ":
 #' @export
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   library(grid)
-  
+
   # Make a list from the ... arguments and plotlist
   plots <- c(list(...), plotlist)
-  
+
   numPlots = length(plots)
-  
+
   # If layout is NULL, then use 'cols' to determine layout
   if (is.null(layout)) {
     # Make the panel
@@ -43,20 +43,20 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
     layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
                      ncol = cols, nrow = ceiling(numPlots/cols))
   }
-  
+
   if (numPlots==1) {
     print(plots[[1]])
-    
+
   } else {
     # Set up the page
     grid.newpage()
     pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-    
+
     # Make each plot, in the correct location
     for (i in 1:numPlots) {
       # Get the i,j matrix positions of the regions that contain this subplot
       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-      
+
       print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
                                       layout.pos.col = matchidx$col))
     }
@@ -220,7 +220,7 @@ convrdatv <- function(myrd=rdroot()) {
     cmd <- gsub(cmd,pat='/',rep='\\\\')
     shell(cmd)
   }
-  
+
 }
 
 #' @export
@@ -242,7 +242,7 @@ descrdatv <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) {
 
 #utility: defines the prepend length
 #' @export
-prependrdatv <- function(ver=1,len=5) {zeroprepend(ver,len)} 
+prependrdatv <- function(ver=1,len=5) {zeroprepend(ver,len)}
 
 #' @export
 ddv <- function(ver=getv()$ver,app=getv()$app,ondisk=FALSE) { #return all dd matching app,ver
@@ -306,10 +306,10 @@ setv <- function(app=getv()$app, type=getv()$type, ver=getv()$ver) {
     #exists('.rdenv')&&is.environment(.rdenv)
     dd <- ddv(ondisk=T)
     .rdenv <<- new.env() #nb any saved work lost on second setv
-    for(i in  seq_along(dd[,num])) { 
+    for(i in  seq_along(dd[,num])) {
       print(dd[i,des])
       print(length(getrd(as.numeric(dd[i,as.numeric(num)]))))
-      assign(x=dd[i,des],value=getrd(as.numeric(dd[i,as.numeric(num)])),envir=.rdenv) 
+      assign(x=dd[i,des],value=getrd(as.numeric(dd[i,as.numeric(num)])),envir=.rdenv)
     }
   }
 }
@@ -335,8 +335,8 @@ getv <- function() {
 #' newrd()
 #' }
 newrd <- function(hard=FALSE) {
-    if(hard) {  
-      shell(paste0("rd /s /q ",rdroot(),"\\rd"))  
+    if(hard) {
+      shell(paste0("rd /s /q ",rdroot(),"\\rd"))
       load("./RD/bics.RData")
     }
     system(paste0("mkdir ", rdroot(), "/rd"))
@@ -377,7 +377,7 @@ dirrd <- function() {
 }
 
 
-  
+
 #' @export
 dd <- function() {
   x <- edit(dirrd())
@@ -407,8 +407,8 @@ idxrd <- function() {
 #' delrd()
 # delrd
 delrd <- function(i = idxrd()) {
-  i <- as.numeric(i)  
-  if (length(i)==1 && i == 0) 
+  i <- as.numeric(i)
+  if (length(i)==1 && i == 0)
         return()
     i <- intersect(i,dirrd()[,as.numeric(num)])
     for(j in seq_along(i)) {
@@ -471,7 +471,7 @@ dtlocf <- function(z, dates = seq(from = min(index(z)), to = max(index(z)), by =
 #' @param pow power x is raised to before mean
 #' @export
 meantri <- function(x, minweight = (1/3), pow = 1, ...) {
-    if (length(x) == 0) 
+    if (length(x) == 0)
         return()
     stopifnot(length(minweight) == 1 && 0 <= minweight && minweight <= 1)
     wgt <- seq(from = minweight, to = 1, length = length(x))
@@ -508,7 +508,7 @@ notail <- function(x,quant=.05) {
 #' @param final logical flag to return just final point
 #' @export
 mynorm <- function(x, sdv = sd(as.numeric(notail(x,quant)), na.rm = TRUE), meanarg = mean(notail(x,quant), na.rm = TRUE), final = FALSE, quant=0., ...) {
-    if (sum(!is.na(x)) < 2) 
+    if (sum(!is.na(x)) < 2)
         return(NA)
     stopifnot(is(x, "numeric"))
     stopifnot((0<=quant) & (quant<.5))
@@ -558,7 +558,7 @@ zoonorm <- function(x, dimension = c("ts", "xs", "tsxs"), ...) {
 #' @keywords utility
 #' @export
 mkdirn <- function(dd) {
-    if (all(is.na(file.info(dd)))) 
+    if (all(is.na(file.info(dd))))
         suppressWarnings(system(paste0("mkdir ", dd)))
 }
 
@@ -566,7 +566,7 @@ mkdirn <- function(dd) {
 #' extract dates
 #'
 #' @export
-extractDates <- function(dates, weekday = FALSE, find = c("all", "last", "first"), period = c("week", "month", "year"), 
+extractDates <- function(dates, weekday = FALSE, find = c("all", "last", "first"), period = c("week", "month", "year"),
     partials = TRUE, firstlast = FALSE, select) {
     find <- match.arg(find)
     period <- match.arg(period)
@@ -617,7 +617,7 @@ extractDates <- function(dates, weekday = FALSE, find = c("all", "last", "first"
     if (firstlast) {
         myindex <- unique(c(1, myindex, myindex1[length(myindex1)]))
     }
-    if (all(is.na(myindex))) 
+    if (all(is.na(myindex)))
         myindex <- NULL
     return(dates[myindex])
 }
@@ -726,7 +726,7 @@ aatests <- function(hard=FALSE,do=list(aabd=T,aapa=T,aaco=T,aate=T,aara=T,aafa=T
 
 #' @export
 derca <- function(start = "1989-01-11", end = "2020-12-24", select = 3, ...) {
-    ca <<- data.table(date = extractDates(seq(from = as.Date(start), to = as.Date(end), by = 1), select = select, ...), 
+    ca <<- data.table(date = extractDates(seq(from = as.Date(start), to = as.Date(end), by = 1), select = select, ...),
         key = "date")
 }
 
@@ -780,9 +780,9 @@ xz <- function(x) {
 # focb - first observation carry back
 #' @export
 focb.mat <- function(x, maxperiods = Inf) {
-    if (nrow(x) < 1) 
+    if (nrow(x) < 1)
         return(x)
-    if (!any(is.na(x))) 
+    if (!any(is.na(x)))
         return(x)
     y <- x[nrow(x):1, , drop = FALSE]
     locf.local(y, maxperiods = maxperiods)[nrow(x):1, , drop = FALSE]
@@ -791,9 +791,9 @@ focb.mat <- function(x, maxperiods = Inf) {
 # locf - last observation carry forward, adapted from 'its' lib
 #' @export
 locf.local <- function(x, maxperiods = Inf, ...) {
-    if (nrow(x) < 1) 
+    if (nrow(x) < 1)
         return(x)
-    if (!any(is.na(x))) 
+    if (!any(is.na(x)))
         return(x)
     y <- x
     jna <- which(apply(is.na(x), 2, any))
@@ -805,13 +805,13 @@ locf.local <- function(x, maxperiods = Inf, ...) {
     return(y)
 }
 
-# 
+#
 #' @export
 most.recent.local <- function(x) {
-    if (!is.logical(x)) 
+    if (!is.logical(x))
         stop("x must be logical")
     x.pos <- which(x)
-    if (length(x.pos) == 0 || x.pos[1] != 1) 
+    if (length(x.pos) == 0 || x.pos[1] != 1)
         x.pos <- c(1, x.pos)
     rep(x.pos, c(diff(x.pos), length(x) - x.pos[length(x.pos)] + 1))
 }
@@ -847,13 +847,13 @@ dtlist <- function(...) {
 #' @export
 combokey0 <- function(x = zoolist(), fun = c("union", "intersect"), ij = c("rownames", "colnames")) {
     ij <- match.arg(ij)
-    setnames(data.table(sort(Reduce(match.arg(fun), lapply(x, get(ij)))), key = "V1"), ifelse(ij == "rownames", "date", 
+    setnames(data.table(sort(Reduce(match.arg(fun), lapply(x, get(ij)))), key = "V1"), ifelse(ij == "rownames", "date",
         "bui"))[]
 }
 #' @export
 combokey <- function(..., drop = "VIX") {
     x <- combokey0(...)
-    if (identical(colnames(x), "date")) 
+    if (identical(colnames(x), "date"))
         x[[1]] <- as.Date(x[[1]])
     x[!(unlist(x[, 1, with = FALSE]) %in% drop)]
 }
@@ -864,7 +864,7 @@ buidate <- function(bui = combokey(ij = "col"), da = combokey(ij = "row")[ca]) {
 
 #' @export
 cart <- function(bui = combokey(ij = "col"), da = xda(1)) {
-    setkey(setnames(data.table(expand.grid(bui[, bui], da[, date], stringsAsFactors = FALSE)), c("bui", "date")), bui, 
+    setkey(setnames(data.table(expand.grid(bui[, bui], da[, date], stringsAsFactors = FALSE)), c("bui", "date")), bui,
         date)[]
 }
 
@@ -898,7 +898,7 @@ sfLapplyWrap <- function(X, FUN, ...) {
 # mkdirn - make one directory
 #' @export
 mkdirn <- function(dd) {
-    if (all(is.na(file.info(dd)))) 
+    if (all(is.na(file.info(dd))))
         suppressWarnings(system(paste0("mkdir ", dd)))
 }
 
@@ -932,9 +932,9 @@ aacol1 <- function(m = k, k = 6, nbrew = 8, name = "Set2") {
 #' @export
 bdp1con <- function() {
     # fields only
-    data.table(data.frame(field = c("CRNCY_ADJ_MKT_CAP", "BICS_LEVEL_3_NAME", "BICS_LEVEL_CODE_ASSIGNED", "BICS_LEVEL_NAME_ASSIGNED", 
-        "CIE_DES", "CNTRY_ISSUE_ISO", "COMPANY_WEB_ADDRESS", "COUNTRY_FULL_NAME", "CRNCY", "CUR_MKT_CAP", "EQY_PRIM_EXCH", 
-        "ICB_SUBSECTOR_NAME", "INDUSTRY_SUBGROUP", "NAME", "REGION_OF_LARGEST_REVENUE", "TICKER_AND_EXCH_CODE", "ICB_SUBSECTOR_NUM"), 
+    data.table(data.frame(field = c("CRNCY_ADJ_MKT_CAP", "BICS_LEVEL_3_NAME", "BICS_LEVEL_CODE_ASSIGNED", "BICS_LEVEL_NAME_ASSIGNED",
+        "CIE_DES", "CNTRY_ISSUE_ISO", "COMPANY_WEB_ADDRESS", "COUNTRY_FULL_NAME", "CRNCY", "CUR_MKT_CAP", "EQY_PRIM_EXCH",
+        "ICB_SUBSECTOR_NAME", "INDUSTRY_SUBGROUP", "NAME", "REGION_OF_LARGEST_REVENUE", "TICKER_AND_EXCH_CODE", "ICB_SUBSECTOR_NUM"),
         override_fields = "EQY_FUND_CRNCY", override_values = "USD"), key = "field")
 }
 
@@ -986,14 +986,14 @@ bdp2dir <- function(flds = bdp2con()) {
 #' lastqtile(vix[,2])
 #' @export
 lastqtile <- function(x, n = 5, start = 2 * n, maxwin = 200 * n) {
-    if (is.zoo(x)) 
+    if (is.zoo(x))
         x <- coredata(x)
     res <- x * NA
     for (i in seq(from = start, to = length(x), by = 1)) {
         i1 <- max(1, i - maxwin):i
         xx <- x[i1][!is.na(x[i1])]
         ii <- length(xx)
-        if (n < length(xx)) 
+        if (n < length(xx))
             res[i] <- ceiling(n * rank(xx)[ii]/ii)
     }
     res
@@ -1032,7 +1032,7 @@ resvol <- function(volq, n = 5) {
         print(paste(i1, i2))
     }
     dseq
-} 
+}
 
 
 #commonda - applies joinfun to derive-000 directory contents
@@ -1158,8 +1158,8 @@ zeroprepend <- function(x,ntotal) {
 }
 
 #' @export
-winsorise <- function (x, minval = quantile(x = x, probs = probs[1], na.rm = na.rm), 
-          maxval = quantile(x = x, probs = probs[2], na.rm = na.rm), 
+winsorise <- function (x, minval = quantile(x = x, probs = probs[1], na.rm = na.rm),
+          maxval = quantile(x = x, probs = probs[2], na.rm = na.rm),
           probs = c(0.05, 0.95), na.rm = FALSE) {
   pmax(pmin(x, maxval), minval)
 }
@@ -1216,14 +1216,14 @@ ncpus <- function(
 #' @export
 #' @family accessor
 getstep <- function(mnem = strsplit(dir(mydir)[1], split = "\\.")[[1]][1], mydir = dern(...), myclass=c("zoo","dt"), ...) {
-  myclass <- match.arg(myclass)   
+  myclass <- match.arg(myclass)
   fnam <- ifelse(myclass=="dt",paste0(mydir, mnem, "_dt.RData"),paste0(mydir, mnem, ".RData"))
   #load(paste0(mydir, mnem, ".RData"))
   if(myclass=="dt") {
     load(paste0(mydir, mnem, ".RData"))
     rownames(x)<-as.character(index(x))
     x <- data.table(mattotab(coredata(x)))
-    
+
   } else {
     load(paste0(mydir, mnem, ".RData"))
   }
@@ -1240,7 +1240,7 @@ getstep <- function(mnem = strsplit(dir(mydir)[1], split = "\\.")[[1]][1], mydir
 getbdp <- function(mydir = dern(n = "000", typ = "BDP"), mnem = bdp1con()[, field]) {
   # loadx <- function(mydir,mnem){{load(paste0(mydir,mnem,'.RData'));x}}
   dt <- getstep(mnem = mnem[1], mydir = mydir)
-  if (1 < length(mnem)) 
+  if (1 < length(mnem))
     for (i in 2:length(mnem)) dt <- dt[getstep(mnem = mnem[i], mydir = mydir)]
   dt
 }
@@ -1256,9 +1256,9 @@ imgzoo <- function(z,                 #zoo
 {
   stopifnot(is(z,"zoo"))
   if (is.null(orderby)) {
-    if (any(is.na(z))) 
+    if (any(is.na(z)))
       orderby <- is.na(z)
-    else if (mode(z) == "character") 
+    else if (mode(z) == "character")
       orderby <- z == "0"
     else orderby <- z == 0
   }
@@ -1280,7 +1280,7 @@ sscrba <- function(bui=sscread()[,ticker],nch=2) {
   as.character(sapply(bui,function(x,nch){paste0(x,paste(rep(' ',max(0,nch-nchar(x))),collapse=''))},nch=nch))
 }
 
-#right trim to n 
+#right trim to n
 #' @export
 sscrt <- function(bui=sscread()[,ticker],nch=3) {
   substr(bui,1,nch)
@@ -1290,14 +1290,14 @@ sscrt <- function(bui=sscread()[,ticker],nch=3) {
 #' @export
 sscrbs <- function(bui=sscrba(),trim=c("space","number")) {
   trim <- match.arg(trim)
-  patt <- switch(trim, 
+  patt <- switch(trim,
                  space=' $',
                  number='(0|[1-9][0-9]*)$'
   )
   stripr <- function(x){
     while(grepl(patt=patt,x=x,perl=TRUE)) {
       x <- substr(x,1,nchar(x)-1)
-    } 
+    }
     x
   }
   as.character(sapply(bui,stripr))
@@ -1409,10 +1409,10 @@ sdl <- function(
     dum1*b1*6,
     dum2*b2*3
   )
-  if(nn>2) {    
+  if(nn>2) {
     dum3 <- sdlcurv(nn)
     dum <- rbind(dum,
-                 dum3*b3*20 
+                 dum3*b3*20
     )
   }
   dum <- bb*dum
@@ -1450,8 +1450,8 @@ offda.sdl <- function(x,                      #dateseries
   i <- match(as.Date(x),as.Date(withinsequence))
   ilag <- outer(i,lags,"+")
   ii <- unique(as.integer(ilag))
-  iii <- ii[ii %in% seq_along(withinsequence)] 
-  sort(withinsequence[iii]) 
+  iii <- ii[ii %in% seq_along(withinsequence)]
+  sort(withinsequence[iii])
 }
 
 #' @export
@@ -1476,7 +1476,7 @@ wls0 <- function(yx,w=rep(1,nrow(yx)),rr=NULL)
   y <- yx[,1,drop=FALSE]
   x <- cbind(1,yx[,-1,drop=FALSE])
   xwgt <- sweep(x,MARGIN=1,STATS=w,FUN="*")
-  xxinv <- solve(t(xwgt)%*%x + rr)
+  xxinv <- solve(t(xwgt)%*%x + rr) #need the inverse for vcv
   co <- xxinv %*% t(xwgt)%*%y
   yvar <- cov.wt(y,wt=w,meth="ML")$cov[1,1,drop=TRUE]
   residvar <- cov.wt(y-x%*%co,wt=w,meth="ML")$cov[1,1,drop=TRUE]
@@ -1490,16 +1490,6 @@ wls0 <- function(yx,w=rep(1,nrow(yx)),rr=NULL)
     residvar=residvar,
     vcv=vcv
   )
-}
-
-#generate matrix with lags of x: only the non-na rows returned; 1st row is tau=0 and starts at i=taufa+1
-#' @export
-lagf <- function(x=1:10,taufa=5) {
-  stopifnot(taufa>=0 && taufa<length(x))
-  if(taufa==0) return(as.matrix(x))
-  tauco <- length(x)-1
-  res <- suppressWarnings(matrix(rep(c(x,rep(NA,taufa)),taufa+1),tauco+taufa,taufa+1))[(taufa:tauco)+1,,drop=F]
-  res
 }
 
 #mse(b) univariate, loocv, for numerical minimisation of overall bayes using optimise()
@@ -1516,20 +1506,55 @@ wls0b <- function(b,yx,w=rep(1,nrow(yx)),rr0,nfold=10,fold=folder(nrow(yx),nfold
   re <- y*NA
   for(i in 1:length(levels(fold))) {
     iout <- fold==levels(fold)[i]
-    xxinv <- solve(t(xwgt[!iout,,drop=F])%*%x[!iout,,drop=F] + rr)#in
-    co <- xxinv %*% t(xwgt[!iout,])%*%y[!iout,,drop=F]#in
+#     xxinv <- solve(t(xwgt[!iout,,drop=F])%*%x[!iout,,drop=F] + rr)#in
+#     co <- xxinv %*% t(xwgt[!iout,])%*%y[!iout,,drop=F]#in
+    co <- solve(t(xwgt[!iout,,drop=F])%*%x[!iout,,drop=F] + rr, t(xwgt[!iout,])%*%y[!iout,,drop=F])#in
+#    co <- xxinv %*% #in
     re[iout] <- y[iout,,drop=F]-x[iout,,drop=F]%*%co
   }
   (length(y)-1)*cov.wt(re,wt=w,meth="unb",center=F)$cov[1,1,drop=TRUE]
 }
 
+
+#generate matrix with lags of x: only the non-na rows returned; 1st row is tau=0 and starts at i=taufa+1
+#' @export
+lagf <- function(x=1:10,taufa=5,...) {
+  stopifnot(taufa>=0 && taufa<length(x))
+  if(taufa==0) return(as.matrix(x))
+  tauco <- length(x)-1
+  res <- suppressWarnings(matrix(rep(c(x,rep(NA,taufa)),taufa+1),tauco+taufa,taufa+1))[(taufa:tauco)+1,,drop=F]
+  if(!is.null(rownames(x))) {
+    rownames(res) <- rownames(x)[taufa+(1:nrow(res))]
+  }
+  colnames(res) <- latotxt(0:taufa,...)
+  res
+}
+
+
+#solve via xv for minimal mse on a low curvature sdl
+#' @export
+wwbsdl <- function(yx,kfold=10,method=c('cycle','random'),bmax=1e6,b1=0,b2=1,bb=1)
+{
+  p <- ncol(yx)-1
+  rr <- sdl2Fun(yx,la=-(p:1),b1=b1,b2=b2,bb=bb)
+  fold <- folder(nrow(yx),lev=kfold,method=method)
+  oo <- optimise(f=wls0b,int=c(0,bmax),yx=yx,rr=rr,tol=1e-10,fold=fold)
+  wwbsdld <- vector('list')
+  wwbsdld$bopt <- c(wls0(yx=yx,rr=rr*oo$minimum),objective=oo$objective,solution=oo$minimum)
+  wwbsdld$b0 <- c(wls0(yx=yx,rr=rr*0),objective=wls0b(b=0,yx=yx,rr=rr,fold=fold),solution=0)
+  wwbsdld$bmax <- c(wls0(yx=yx,rr=rr*bmax),objective=wls0b(b=bmax,yx=yx,rr=rr,fold=fold),solution=bmax)
+  if((wwbsdld$bmax$objective-wwbsdld$bopt$objective)/abs(wwbsdld$bopt$objective)<(-1e-6)) stop('minimisation failed')
+  wwbsdld
+}
+
 #factor levels define lev folds of a length len
 #' @export
-folder <- function(len=100,lev=10,method=c('cycle','random')) {
+folder <- function(len=100,lev=10,method=c('cycle','random'),seed=sample(1:1e4,1)) {
   method <- match.arg(method)
   if(method=='cycle') {
     as.factor(rep(1:lev,length=len))
   } else {
+    set.seed(seed=seed)
     as.factor(sample(1:lev,len,rep=T))
   }
 }
@@ -1565,7 +1590,7 @@ getca <- function(){ca}
 
 #' @export
 extrca <- function(t1, t2) {
-  ca[(as.character(t1)<=ca)&(ca<=as.character(t2))]  
+  ca[(as.character(t1)<=ca)&(ca<=as.character(t2))]
 }
 
 v1deploydata <- function(){c('segexd','setdad','scoxd','decd','yxtad','ldgxd','yxtapd','wimad','dezod','xvmd','xvijd','ijsed','segsumd','fosumd','fisumd','celid')}
@@ -1667,7 +1692,7 @@ tgt.solve.QP <- function(
   bui <- rownames(dvec)
   objfun <- switch(ttyp,'vol'=volqp,'gross'=grossqp)
   if(vcomp=="precalc") {Dmat <- ce} else {Dmat <- vcvce(ce)[[vcomp]][bui,bui]}
-  w0 <- solve(Dmat,dvec) 
+  w0 <- solve(Dmat,dvec)
   scal <- objfun(w=w0,Dmat=Dmat)
   upr <- 5*scal/tgt #gives tgt-tgt*<0 because tgt decreases with lambda (checked on next line)
   if(tgtqp(x=upr, Dmat=Dmat, dvec=dvec, constr=constr, tgt=tgt, ttyp=ttyp, objfun=objfun)>0) stop("unexpected condition in tgt.solve.QP")
@@ -1678,8 +1703,8 @@ tgt.solve.QP <- function(
     sol <- uniroot(
       f=tgtqp,
       interval=c(upr,lwr),
-      Dmat=Dmat, 
-      dvec=dvec, 
+      Dmat=Dmat,
+      dvec=dvec,
       constr=constr,
       tgt=tgt,
       ttyp=ttyp,
@@ -1691,7 +1716,7 @@ tgt.solve.QP <- function(
     if(estim.prec>0.01*root) print("lowering tolerance to achieve accuracy")
   }
   sol <- solve.QP(Dmat=root*Dmat, dvec=dvec, Amat=constr$Am, bvec=constr$bv, meq=constr$meq)
-  list(root=root,solution=sol) 
+  list(root=root,solution=sol)
 }
 
 #combine y with an x lag distribution ; return single zoo
@@ -1785,7 +1810,7 @@ deltime <- function(i) {
 }
 
 #' add rownames to zoo
-#' 
+#'
 #' in case rownames got lost, put them back
 #' @param z zoo
 #' @export
@@ -1798,7 +1823,7 @@ zm <- function(z) {
 #note that sorting these will reverse order if negatives
 #' @export
 latotxt <-
-  function(la,nchar=4,minustext='minus',plustext='plus',pretext='') 
+  function(la,nchar=4,minustext='minus',plustext='plus',pretext='')
   {
     mysign <- sign(la)
 #    latext <- as.character(abs(la))
@@ -1812,13 +1837,13 @@ latotxt <-
 
 #' @export
 txttola <-
-  function(x=dirfld("cala"),minustext='minus',plustext='plus',pretext='') 
+  function(x=dirfld("cala"),minustext='minus',plustext='plus',pretext='')
   {
 #    x <- union(x[grep(patt="^minus",x)],x[grep(patt="^plus",x)])
     x <- c(x[grep(patt=paste0("^",pretext,minustext),x)],x[grep(patt=paste0("^",pretext,plustext),x)])
     x <- gsub(patt=paste0("^",pretext,minustext),rep="-",x=x)
     x <- gsub(patt=paste0("^",pretext,plustext),rep="",x=x)
-    as.integer(x) 
+    as.integer(x)
   }
 
 
@@ -1855,3 +1880,14 @@ lags <-
 
 #' @export
 sr <- function(x) {mean(x,na.rm=T)/sd(x,na.rm=T)}
+
+#fit
+#' @export
+dlfit <- function(yx,wwbsdld,comp=c('bopt','b0','bmax')) {
+  comp <- match.arg(comp)
+  stopifnot(ncol(yx)==length(wwbsdld[[comp]]$coef))
+  x <- yx
+  x[,1] <- 1
+  print(wwbsdld[[comp]]$coef)
+  cbind(yx[,1],x%*%t(wwbsdld[[comp]]$coef))
+}
