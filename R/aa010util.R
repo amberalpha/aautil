@@ -1497,6 +1497,7 @@ wls0 <- function(yx,w=rep(1,nrow(yx)),rr=NULL)
 wls0b <- function(b,yx,w=rep(1,nrow(yx)),rr0,nfold=10,fold=folder(nrow(yx),nfold))
 {
   nfold <- min(nfold,nrow(yx))
+  stopifnot(is.matrix(yx))
   stopifnot(is.factor(fold) && length(fold)==nrow(yx))
   stopifnot(length(w)==nrow(yx))
   rr <- rbind(0,cbind(0,rr0*b))
