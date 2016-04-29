@@ -1533,8 +1533,9 @@ lagf <- function(x=1:10,taufa=5,...) {
 
 #solve via xv for minimal mse on a low curvature sdl
 #' @export
-wwbsdl <- function(yx,kfold=10,method=c('cycle','random'),bmax=1e6,b1=0,b2=1,bb=1)
+wwbsdl <- function(dt,kfold=10,method=c('cycle','random'),bmax=1e6,b1=0,b2=1,bb=1)
 {
+  yx <- as.matrix(dt)
   p <- ncol(yx)-1
   rr <- sdl2Fun(yx,la=-(p:1),b1=b1,b2=b2,bb=bb)
   fold <- folder(nrow(yx),lev=kfold,method=method)
