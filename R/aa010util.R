@@ -1519,7 +1519,7 @@ wls0b <- function(b,yx,w=rep(1,nrow(yx)),rr0,nfold=10,fold=folder(nrow(yx),nfold
 
 #generate matrix with lags of x: only the non-na rows returned; 1st row is tau=0 and starts at i=taufa+1
 #' @export
-lagf <- function(x=1:10,taufa=5,...) {
+lagf <- function(x=1:10,taufa=5,pretext='.lag-',...) {
   stopifnot(taufa>=0 && taufa<length(x))
   if(taufa==0) return(as.matrix(x))
   tauco <- length(x)-1
@@ -1527,7 +1527,7 @@ lagf <- function(x=1:10,taufa=5,...) {
   if(!is.null(rownames(x))) {
     rownames(res) <- rownames(x)[taufa+(1:nrow(res))]
   }
-  colnames(res) <- latotxt(0:taufa,...)
+  colnames(res) <- latotxt(0:taufa,pretext=pretext,...)
   res
 }
 
@@ -1892,4 +1892,9 @@ dlfit <- function(yx,wwbsdld,comp=c('bopt','b0','bmax')) {
   x[,1] <- 1
   print(wwbsdld[[comp]]$coef)
   cbind(yx[,1],x%*%t(wwbsdld[[comp]]$coef))
+}
+
+#' @export
+getkey <- function(x) {
+  unique(x[,key(x),with=F])
 }
