@@ -182,10 +182,17 @@ memrdatv <- function(memuse=FALSE,winenable=FALSE) { #only applies to rdatv,gett
 gett <- function(ty) {getrdatv(ty=ty)} #this should be same as other copies and put in util
 
 #' @export
-putt <- function(x,ty=deparse(substitute(x)),save=T) {
+putt <- function(x,ty=deparse(substitute(x)),save=T,ret=T) {
   if(save) { putrdatv(x,ty=ty) }
-  x
+  if(ret) return(x)
 }
+
+#this works but don't really like it
+# puta <- function(name,expression) {
+#   assign(name,eval(parse(text=expression)),env=globalenv())
+#   putrdatv(get(name,env=globalenv()),type=name)
+#   get(name,env=globalenv())
+# }
 
 #' grep existing entry with structured description
 #'
