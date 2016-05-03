@@ -1902,6 +1902,8 @@ dlfit <- function(yx,wwbsdld,comp=c('bopt','b0','bmax')) {
 }
 
 #' @export
-getkey <- function(x) {
-  unique(x[,key(x),with=F])
+getkey <- function(x,un=T) {
+  res <- x[,key(x),with=F]
+  if(un) {res <- unique(res)}
+  res
 }
