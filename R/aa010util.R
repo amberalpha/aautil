@@ -658,12 +658,13 @@ aatopcreate <- function() {
 
 # create very top dirs
 #' @export
-aatopselect <- function(ver = c("prod", "test",".")) {
-    ver <- match.arg(ver)
+aatopselect <- function(ver = 'prod') {
+    ver <- switch(ver,p='prod',t='test',ver) #nasty, but this makes backward compatible with match.arg, for 1-letter abbrev, the most common
+    #ver <- match.arg(ver) #used to be: prod/test/.
     if(ver!='.') {
-      root.global <<- paste0(rappdirs::user_data_dir(), "\\aabb\\", ver, "\\")
+    root.global <<- paste0(rappdirs::user_data_dir(), "\\aabb\\", ver, "\\")
     } else {
-      root.global <<- "."
+    root.global <<- "."
     }
 }
 
