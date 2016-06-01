@@ -344,8 +344,9 @@ getv <- function() {
 newrd <- function(hard=FALSE) {
     if(hard) {
       shell(paste0("rd /s /q ",rdroot(),"\\rd"))
-      load("./RD/bics.RData")
+      #load("./RD/bics.RData")
     }
+    bics <- bicsdump()
     system(paste0("mkdir ", rdroot(), "/rd"))
     putrd(bics, "bicsindustrydescription", i = 0)
 }
@@ -654,6 +655,11 @@ aatopcreate <- function() {
     mkdirn(paste0(rappdirs::user_data_dir(), "\\aabb\\prod"))
 }
 
+#create one 'application directory'
+#' @export
+aatopcreate1 <- function(ver="temp") {
+  mkdirn(paste0(rappdirs::user_data_dir(), paste0("\\aabb\\",ver)))
+}
 
 
 # create very top dirs
@@ -940,7 +946,7 @@ aacol1 <- function(m = k, k = 6, nbrew = 8, name = "Set2") {
 #' @export
 bdp1con <- function() {
     # fields only
-    data.table(data.frame(field = c("CRNCY_ADJ_MKT_CAP", "BICS_LEVEL_3_NAME", "BICS_LEVEL_CODE_ASSIGNED", "BICS_LEVEL_NAME_ASSIGNED",
+    data.table(data.frame(field = c("NET_DEBT","CRNCY_ADJ_MKT_CAP", "BICS_LEVEL_3_NAME", "BICS_LEVEL_CODE_ASSIGNED", "BICS_LEVEL_NAME_ASSIGNED",
         "CIE_DES", "CNTRY_ISSUE_ISO", "COMPANY_WEB_ADDRESS", "COUNTRY_FULL_NAME", "CRNCY", "CUR_MKT_CAP", "EQY_PRIM_EXCH",
         "ICB_SUBSECTOR_NAME", "INDUSTRY_SUBGROUP", "NAME", "REGION_OF_LARGEST_REVENUE", "TICKER_AND_EXCH_CODE", "ICB_SUBSECTOR_NUM"),
         override_fields = "EQY_FUND_CRNCY", override_values = "USD"), key = "field")
