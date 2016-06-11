@@ -1,6 +1,6 @@
 #' @export
 bicsdump <- function() {
-data.table(structure(list(code = c("10", "1010", "101010", "10101010", "1010101010", 
+data.table(structure(list(bcna = c("10", "1010", "101010", "10101010", "1010101010", 
 "1010101011", "101010101110", "1010101012", "101010101210", "101010101211", 
 "1010101013", "1010101014", "10101011", "1010101110", "1010101111", 
 "10101012", "1010101210", "1010101211", "101011", "10101110", 
@@ -3144,6 +3144,6 @@ data.table(structure(list(code = c("10", "1010", "101010", "10101010", "10101010
 "For segments that are reported for corporate adjustments or for administrative office activities These segments are not considered a part of their business activities", 
 "For segments that adjusts revenue to account for intersegment or non-external revenue sales These segments are not considered a part of their business activities", 
 "For companies in cases where no available information is available to discern their business activities"
-)), .Names = c("code", "name", "desc"), row.names = c(NA, -2288L
+)), .Names = c("bcna", "name", "desc"), row.names = c(NA, -2288L
 ), class = "data.frame"))
 }

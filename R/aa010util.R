@@ -182,8 +182,13 @@ memrdatv <- function(memuse=FALSE,winenable=FALSE) { #only applies to rdatv,gett
 gett <- function(ty) {getrdatv(ty=ty)} #this should be same as other copies and put in util
 
 #' @export
-putt <- function(x,ty=deparse(substitute(x)),save=T,ret=T) {
+putt <- function(x,ty=deparse(substitute(x)),save=T,ret=getreturn(),chk=getchk(),verbose=getverbose()) {
   if(save) { putrdatv(x,ty=ty) }
+  fun <- paste0(ty,'chk')
+  if(chk && exists(fun) && is.function(get(fun)) ) {
+    if(verbose) {print(paste0('check: ',fun))}
+    do.call(fun,list(x=x))
+  }
   if(ret) return(x)
 }
 
@@ -1914,3 +1919,49 @@ getkey <- function(x,un=T) {
   if(un) {res <- unique(res)}
   res
 }
+
+#' @export
+setchk <- function(x=T) {
+  stopifnot(is.logical(x))
+  global.chk <<- x
+}
+
+#' @export
+getchk <- function() {
+  if(!exists('global.chk') || !is.logical(global.chk) || !global.chk) { 
+    return(FALSE)
+  } else {
+    return(TRUE)
+  }
+}
+
+#' @export
+setverbose <- function(x=T) {
+  stopifnot(is.logical(x))
+  global.verbose <<- x
+}
+
+#' @export
+getverbose <- function() {
+  if(!exists('global.verbose') || !is.logical(global.verbose) || !global.verbose) { 
+    return(FALSE)
+  } else {
+    return(TRUE)
+  }
+}
+
+#' @export
+setreturn <- function(x=T) {
+  stopifnot(is.logical(x))
+  global.return <<- x
+}
+
+#' @export
+getreturn <- function() {
+  if(!exists('global.return') || !is.logical(global.return) || global.return) { 
+    return(TRUE)
+  } else {
+    return(FALSE)
+  }
+}
+
