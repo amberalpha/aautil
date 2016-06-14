@@ -1632,12 +1632,12 @@ deploydata <- function(vin=getv()$ver,vout=nextv(),type=v2deploydata()) {
 }
 
 #' @export
-copydown <- function(vout=nextv()-1) { #copies a single version down one level in tree
+copydown <- function(vout=nextv()-1,root.local=root.global) { #copies a single version down one level in tree
   vout <- prependrdatv(vout)
   allfnam <- dir(paste0(rdroot(),'/rd'))
   fnam <- allfnam[grep(paste0(patt='.?ver',vout,'.RData'),allfnam)]
   for(i in seq_along(fnam)) {
-    cmd <- paste0('cp ../rd/',fnam[i],' ./rd/',fnam[i])
+    cmd <- paste0('cp ',root.local,'/rd/',fnam[i],' ./rd/',fnam[i])
     shell(cmd)
   }
 }
