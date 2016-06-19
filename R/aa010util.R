@@ -182,7 +182,7 @@ memrdatv <- function(memuse=FALSE,winenable=FALSE) { #only applies to rdatv,gett
 gett <- function(ty) {getrdatv(ty=ty)} #this should be same as other copies and put in util
 
 #' @export
-putt <- function(x,ty=deparse(substitute(x)),save=T,ret=getreturn(),chk=getchk(),verbose=getverbose()) {
+putt <- function(x,ty=deparse(substitute(x)),save=getkeep(),ret=getreturn(),chk=getchk(),verbose=getverbose()) {
   if(save) { putrdatv(x,ty=ty) }
   fun <- paste0(ty,'chk')
   if(chk && exists(fun) && is.function(get(fun)) ) {
@@ -521,8 +521,8 @@ notail <- function(x,quant=.05) {
 #' @param final logical flag to return just final point
 #' @export
 mynorm <- function(x, sdv = sd(as.numeric(notail(x,quant)), na.rm = TRUE), meanarg = mean(notail(x,quant), na.rm = TRUE), final = FALSE, quant=0., ...) {
-    if (sum(!is.na(x)) < 2)
-        return(NA)
+    if (sum(!is.na(x)) < 1)
+        return(1*NA)
     stopifnot(is(x, "numeric"))
     stopifnot((0<=quant) & (quant<.5))
     res <- qnorm(p = rank(x, na.last = "keep")/(1 + sum(!is.na(x))), sd = sdv, mean = meanarg)
@@ -1956,6 +1956,7 @@ setreturn <- function(x=T) {
   global.return <<- x
 }
 
+
 #' @export
 getreturn <- function() {
   if(!exists('global.return') || !is.logical(global.return) || global.return) { 
@@ -1965,3 +1966,17 @@ getreturn <- function() {
   }
 }
 
+#' @export
+setkeep <- function(x=T) {
+  stopifnot(is.logical(x))
+  global.keep <<- x
+}
+
+#' @export
+getkeep <- function() {
+  if(!exists('global.keep') || !is.logical(global.keep) || global.keep) { 
+    return(TRUE)
+  } else {
+    return(FALSE)
+  }
+}
