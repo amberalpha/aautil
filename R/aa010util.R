@@ -192,6 +192,25 @@ putt <- function(x,ty=deparse(substitute(x)),save=getkeep(),ret=getreturn(),chk=
   if(ret) return(x)
 }
 
+#put a named list
+#' @export
+putl <- function(x=list(a=1,b=2)) {
+  stopifnot(is.list(x) && !any(is.null(names(x))))
+  for(i in seq_along(x)) putrdatv(x[[i]],type=names(x)[i])
+}
+
+#get names to list
+#' @export
+getl <- function(x=names(list(a=1,b=2))) {
+  stopifnot(is.character(x))
+  xx <- structure(as.list(x),names=x)
+  for(i in seq_along(x)) xx[[i]] <- getrdatv(type=x[i])
+  xx
+}
+
+
+
+
 #this works but don't really like it
 # puta <- function(name,expression) {
 #   assign(name,eval(parse(text=expression)),env=globalenv())
@@ -1980,3 +1999,5 @@ getkeep <- function() {
     return(FALSE)
   }
 }
+
+
