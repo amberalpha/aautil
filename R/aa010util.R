@@ -1999,5 +1999,13 @@ getkeep <- function() {
     return(FALSE)
   }
 }
+#' @export
+unfactordt <- function(x) {
+  stopifnot(is(x,'data.table'))
+  x <- data.frame(x)
+  i <- sapply(x, is.factor)
+  x[i] <- lapply(x[i], as.character)
+  data.table(x)
+}
 
 
