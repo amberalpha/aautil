@@ -405,6 +405,7 @@ dirrd <- function() {
     num <- unlist(lapply(lapply(lapply(l1, strsplit, split = rddelim()), "[[", 1), "[", 1))
     dat <- unlist(lapply(lapply(lapply(l1, strsplit, split = rddelim()), "[[", 1), "[", 2))
     des <- unlist(lapply(lapply(lapply(l1, strsplit, split = rddelim()), "[[", 1), "[", 3))
+    if(is.null(num)) shell(rdroot()) #this is a means to get rdroot() echoed from server
     setkeyv(data.table(data.frame(num = num, dat = dat, des = des)), "num")[]
 }
 
