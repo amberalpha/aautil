@@ -616,6 +616,7 @@ extractDates <- function(dates, weekday = FALSE, find = c("all", "last", "first"
         theperiod <- as.POSIXlt(dates[myindex1])$year
         dayinperiod <- as.POSIXlt(dates[myindex1])$yday
     } else if (period == "week") {
+        warning('week believed broken at yearends!')
         theweek <- as.numeric(format(as.POSIXct(dates[myindex1]), "%U"))
         theyear <- as.numeric(format(dates[myindex1], "%Y"))
         incorrectPartialWeek <- theweek == 0
@@ -1638,18 +1639,19 @@ v1deploydata <- function(){c('segexd','setdad','scoxd','decd','yxtad','ldgxd','y
 v2deploydata <- function(){c('scoxd','dezod','cncd','zomad','pars','decd','vcfmtd','jomad','dezocombod','celid','varyxd','lmscod','vcvdecd')}
 
 #' @export
-deploydata <- function(vin=getv()$ver,vout=nextv(),type=v2deploydata()) {
+deploydata <- function(vin=getv()$ver,vout=nextv(),type=v2deploydata(),appout=getv()$app) {
   stopifnot(!any(is.na(list(vin,vout,type))) && length(vin)==1 && length(vout)==1 && length(type)>0)
   for(i in seq_along(type)) {
     print(type[i])
     x <- getrdatv(type=type[i],v=vin)
     if(!is.null(x)) { #do safety checks
       stopifnot(!is.null(x)) #input exists
-      stopifnot(is.null(getrdatv(v=vout,type=type[i]))) #no overwrite
+      stopifnot(is.null(getrdatv(v=vout,type=type[i],app=appout))) #no overwrite
     }
-    putrdatv(x,v=vout,type=type[i])
+    putrdatv(x,v=vout,type=type[i],app=appout)
   }
 }
+
 
 #' @export
 copydown <- function(vout=nextv()-1,root.local=root.global) { #copies a single version down one level in tree
