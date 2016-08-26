@@ -4,7 +4,7 @@
   
   if (!exists("root.global")) { aatopselect() } # old version, now set in options, see below
   
-  ca <- derca()
+  ca <- suppressWarnings(derca())
   
   op <- options()
   op.aa <- list(
