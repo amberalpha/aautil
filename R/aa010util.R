@@ -2012,3 +2012,37 @@ unfactordt <- function(x) {
 }
 
 
+#' Utility returns data.table controlling bdh() arguments
+#'
+#' The returned table is used to construct the directory tree and control the download, supplying fields and overrides
+#' @examples
+#' \dontrun{
+#' bdhbcon()
+#' }
+#' @export
+#' @family constructors
+bdhbcon <- function() {
+  dfl <- vector("list", 100)
+  dfl[[1]] <- data.frame(field = "px_last", adjustmentSplit = "TRUE", adjustmentNormal = "TRUE", currency = NA)
+  dfl[[2]] <- data.frame(field = "px_last", adjustmentSplit = "TRUE", adjustmentNormal = "TRUE", currency = "USD")
+  dfl[[3]] <- data.frame(field = "px_last", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  dfl[[4]] <- data.frame(field = "eqy_weighted_avg_px", adjustmentSplit = "TRUE", adjustmentNormal = "TRUE", currency = "USD")
+  dfl[[5]] <- data.frame(field = "eqy_weighted_avg_px", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  dfl[[6]] <- data.frame(field = "cur_mkt_cap", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  dfl[[7]] <- data.frame(field = "eqy_sh_out", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  dfl[[8]] <- data.frame(field = "best_target_price", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  dfl[[9]] <- data.frame(field = "px_to_book_ratio", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  dfl[[10]] <- data.frame(field = "px_to_cash_flow", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  dfl[[11]] <- data.frame(field = "eqy_dvd_yld_ind", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  dfl[[12]] <- data.frame(field = "px_volume", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  dfl[[13]] <- data.frame(field = "eqy_free_float_pct", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  dfl[[14]] <- data.frame(field = "pe_ratio", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  dfl[[15]] <- data.frame(field = "best_esales_cur_yr", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  dfl[[16]] <- data.frame(field = "best_px_sales_ratio", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  dfl[[17]] <- data.frame(field = "best_current_ev_best_sales", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
+  
+  x <- rbindlist(dfl)[, `:=`(field, toupper(field))]
+  x[, `:=`(subdir, paste0(substr(adjustmentSplit, 1, 1), substr(adjustmentNormal, 1, 1), ifelse(is.na(currency), "L", 
+                                                                                                "U")))]
+  setkey(x, field, subdir)[]
+}
