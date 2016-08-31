@@ -106,6 +106,39 @@ descrd <- function(i=idxrd()) {
   dirrd()[formatC(i, width = 5, format = "d", flag = "0")]
 }
 
+#' @export
+doziprd <- function(
+  root=rdroot()
+  ,
+  zname=paste0(format(Sys.time(),'%Y%m%d%H%M%S'),'.zip')
+) {
+  mycmd <- paste0('zip -j -m ',root,zname,' ',root,'/rd/*.RData')
+  shell(mycmd)
+}
+
+#' @export
+dirziprd <- function(
+  root=rdroot()
+  ,
+  zpatt='^20[0-9]{12}.zip$' #20 + 12 digits
+) {
+  dd <- dir(root)
+  dd[grep(zpatt,dd)]
+}
+
+#' @export
+unziprd <- function(
+  root=rdroot() 
+  ,
+  zf=rev(sort(dirziprd(root)))[1]
+) {
+  zfile <- paste0(root,zf)
+  rddir <- paste0(gsub("/$", "", gsub("\\", "/", root, fixed=TRUE) ) ,'/rd/')
+  cmd <- paste0('unzip ',zfile,' -d ',rddir)
+  shell(cmd)
+}
+
+
 
 #' @export
 badrd <- function() {
@@ -2046,3 +2079,5 @@ bdhbcon <- function() {
                                                                                                 "U")))]
   setkey(x, field, subdir)[]
 }
+
+
