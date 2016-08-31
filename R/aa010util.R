@@ -112,7 +112,7 @@ doziprd <- function(
   ,
   zname=paste0(format(Sys.time(),'%Y%m%d%H%M%S'),'.zip')
 ) {
-  mycmd <- paste0('zip -j -m ',root,zname,' ',root,'/rd/*.RData')
+  mycmd <- paste0('zip -j -m ',root,'/',zname,' ',root,'/rd/*.RData')
   shell(mycmd)
 }
 
@@ -122,7 +122,7 @@ dirziprd <- function(
   ,
   zpatt='^20[0-9]{12}.zip$' #20 + 12 digits
 ) {
-  dd <- dir(root)
+  dd <- dir(paste0(root,'/'))
   dd[grep(zpatt,dd)]
 }
 
@@ -132,7 +132,7 @@ unziprd <- function(
   ,
   zf=rev(sort(dirziprd(root)))[1]
 ) {
-  zfile <- paste0(root,zf)
+  zfile <- paste0(root,'/',zf)
   rddir <- paste0(gsub("/$", "", gsub("\\", "/", root, fixed=TRUE) ) ,'/rd/')
   cmd <- paste0('unzip ',zfile,' -d ',rddir)
   shell(cmd)
