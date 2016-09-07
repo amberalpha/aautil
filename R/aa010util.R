@@ -2080,4 +2080,51 @@ bdhbcon <- function() {
   setkey(x, field, subdir)[]
 }
 
+#bd protocol for counting Rblpapi usage
+#' @export
+bdw <- function(
+          sec='barc ln equity'
+          ,
+          field='name'
+          ,
+          fn=c('bdp','bdh','bds')
+          ,
+          ...
+          ) {
+  fn <- match.arg(fn)
+  logdt <- getbdw()
+  row <- data.table(datetime=Sys.time(),fn=fn,sec=length(sec),field=length(field))
+  x <- do.call(fn,args=c(list(sec=sec,field=field),list(...)))
+  putbdw(rbind(logdt,row))
+  x
+}
+#' @export
+getbdw <- function() {
+  rdr <- root.global
+  on.exit({root.global <<- rdr})
+  aatopselect('p')
+  getrdatv(app='blp',type='usage',ver=0)
+}
+#' @export
+putbdw <- function(logdt) {
+  rdr <- root.global
+  on.exit({root.global <<- rdr})
+  aatopselect('p')
+  putrdatv(logdt,app='blp',type='usage',ver=0)
+}
 
+#quick quantile
+#' @export
+cutN <- function(X , n = 4){
+  if(sd(X)==0) return(rep(ceiling(n/2),length(X)))
+  as.numeric(
+    cut(
+    X,
+    include.lowest = TRUE ,
+    breaks = quantile(
+      X , 
+      probs = (0:n)/n ,
+      na.rm = TRUE )
+    )
+  )
+}

@@ -276,3 +276,24 @@ expect_equal(rownames(x1),c('pad',rownames(x),'pad'))
 
 x1 <- lags(x,la=-1:1,pad=T) #correct, extends input range so all possible range exists, but without 
 expect_equal(x-x1[rownames(x),'minus0000'],x*0)
+
+#--------bd protocol
+require(Rblpapi)
+require(aautil)
+root.global <<- '.'
+blpConnect()
+end=Sys.Date()-1
+start=end-5
+options=c(
+  nonTradingDayFillOption="ALL_CALENDAR_DAYS",
+  nonTradingDayFillMethod="NIL_VALUE"
+)
+
+bdw('barc ln equity','name')
+bdw(c('barc ln equity','ulvr ln equity'),'px_last',start=start,end=end,options=options,fn='bdh')
+bdw(c('barc ln equity','ulvr ln equity'),c('px_last','px_volume'),start=start,end=end,options=options,fn='bdh')
+x3 <- getbdw()
+x4 <- x3[nrow(x3)+(-2:0)]
+x <- x4[,expect_equal(sec,c(1,2,2))]
+x <- x4[,expect_equal(field,c(1,1,2))]
+x <- x4[,expect_equal(fn,c('bdp','bdh','bdh'))]
