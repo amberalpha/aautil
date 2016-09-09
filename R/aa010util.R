@@ -2128,3 +2128,9 @@ cutN <- function(X , n = 4){
     )
   )
 }
+
+#' @export
+f_dowle2 = function(DT) {
+  for (i in names(DT)) { DT[is.na(get(i)),i:=0,with=FALSE] }
+  DT
+}
