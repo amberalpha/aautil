@@ -2092,10 +2092,10 @@ bdw <- function(
           ...
           ) {
   fn <- match.arg(fn)
-  logdt <- getbdw()
-  row <- data.table(datetime=Sys.time(),fn=fn,sec=length(sec),field=length(field))
+  #logdt <- getbdw() #collisions in parallel processes -> probs, so must do this outside snow
+  #row <- data.table(datetime=Sys.time(),fn=fn,sec=length(sec),field=length(field))
   x <- do.call(fn,args=c(list(sec=sec,field=field),list(...)))
-  putbdw(rbind(logdt,row))
+  #putbdw(rbind(logdt,row))
   x
 }
 #' @export
@@ -2133,4 +2133,145 @@ cutN <- function(X , n = 4){
 f_dowle2 = function(DT) {
   for (i in names(DT)) { DT[is.na(get(i)),i:=0,with=FALSE] }
   DT
+}
+
+
+
+#' Create directories from pathnames
+#'
+#' Creates directories
+#' @param x list of directory paths
+#' @export
+#' @examples
+#' \dontrun{
+#' 
+#' #the following are the norm for initialising directories - see deraabd for usage
+#' 
+#' #top-level directories
+#' newbddir(bdtopdir())
+#' 
+#' #timeseries directories
+#' newbddir(bdhbdir())
+#' 
+#' #point data directories, single key and dual key
+#' newbddir(bdp1dir())
+#' newbddir(bdp2dir())
+#' }
+#' @family directory management
+newbddir <- function(x = bdtopdir(), hard = FALSE, root.local=unlist(options('aa.path'))) {
+  mkdirn(root.local)
+  if (hard) {
+    nul <- lapply(paste0("rd /s /q ", root.local, bdtopdir(top = TRUE)), shell)
+  }
+  nul <- lapply(paste0(root.local, x[order(nchar(x))]), mkdirn)
+}
+
+
+#' Paths to destination directory tree upper levels
+#'
+#' Returns paths for directory creation
+#' 
+#' Paths describing subdirectories of root.local; start and end without slash or backslash delimiters
+#' Normally for internal use.
+#' @param top logical flag to return only the top-level directories
+#' @export
+#' @examples
+#' bdtopdir()
+#' @family directory management
+
+bdtopdir <- function(top = FALSE) {
+  x <- c("BDH", "BDH/derive-000", "BDH/derive-001", "BDH/raw", "BDP", "BDP/derive-000", "BDP/key1", "BDP/key2", "BDS", 
+         "macro", "macro/derive-000", "macro/raw")
+  if (top) {
+    x[!grepl(x = x, patt = "/")]
+  } else {
+    x[order(nchar(x))]
+  }
+}
+
+#' Paths to timeseries directory tree
+#'
+#' Generates paths for directory creation
+#' @param flds data.table with fields 'field' and 'subdir' generated from fields table bdhbcon() + logic
+#' @export
+#' @examples
+#' \dontrun{
+#' bdhbdir()
+#' }
+#' @family directory management
+bdhbdir <- function(flds = bdhbcon()) {
+  x <- paste0("BDH/raw/", flds[, field], "/", flds[, subdir])
+  x <- c(x, paste0("BDH/raw/", flds[, field]))
+  x[order(nchar(x))]
+}
+
+
+#' @export
+bdppre <- function(
+  subd = bdp1dir()
+  ,
+  root.local=unlist(options('aa.path'))
+) {
+  lapply(subd,function(x) {paste0(root.local,x, "/")})
+}
+
+#' @export
+setglobal <- function(
+  x='run'
+  ,
+  value=T
+) {
+  assign(paste0(x,'.g'),value,envir=globalenv())
+}
+#' @export
+getglobal <- function(
+  x='run'
+) {
+  get(paste0(x,'.g'),value,envir=globalenv())
+}
+
+
+#' @export
+run <- function(
+  ty='tst'
+  ,
+  doit=getglobal('run')
+  ,
+  returnit=is(x,'ggvis')
+) {
+  if(doit) {
+    {x <- do.call(paste0(ty,'Fun'),args=list())}
+  } else {
+    {x <- gett(paste0(ty,'d'))}
+  }
+  assign(paste0(ty,'d'),x,envir=globalenv())
+  if(returnit) return(x)
+}
+
+#improved version of run(), allows printing
+#' @export
+do <- function(
+  ty='tst'
+  ,
+  doit=getglobal('do')
+  ,
+  returnit={is(x,'ggvis')|is(x,'data.table')|doit=='key'}
+) {
+  x <- NULL
+  switch(doit
+         ,
+         run={
+           x <- do.call(paste0(ty,'Fun'),args=list())
+           assign(paste0(ty,'d'),x,envir=globalenv())
+           return(x)
+         }
+         ,
+         get={
+           x <- gett(paste0(ty,'d'))
+           assign(paste0(ty,'d'),x,envir=globalenv())
+           return(x)
+         }
+         ,
+         print={print(get(paste0(ty,'Fun')))}
+  )
 }

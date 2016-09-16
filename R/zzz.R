@@ -8,7 +8,7 @@
   
   op <- options()
   op.aa <- list(
-    aa.path = paste0(rappdirs::user_data_dir(),"\\aabb\\prod\\")
+    aa.path = paste0(rappdirs::user_data_dir(),"\\aabb\\aabb\\") #second level is 'for historical reasons' - could eliminate this in a new install
   )
   
   toset <- !(names(op.aa) %in% names(op))
