@@ -338,7 +338,7 @@ dirv <- function(app=getv()$app) { #return all dd matching app,ver
 
 #' @export
 nextv <- function(app=getv()$app) { #return all dd matching app,ver
-  suppressWarnings(max(c(0,dirv(app=app),na.rm=T)+1))
+  suppressWarnings(max(c(0,dirv(app=app)),na.rm=T)+1)
 }
 
 
