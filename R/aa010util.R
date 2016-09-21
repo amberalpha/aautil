@@ -110,9 +110,16 @@ descrd <- function(i=idxrd()) {
 doziprd <- function(
   root=rdroot()
   ,
-  zname=paste0(format(Sys.time(),'%Y%m%d%H%M%S'),'.zip')
+  verbose=getverbose()
+  ,
+  zname=paste0(format(Sys.time(),'%Y%m%d%H%M%S'),'-',abbreviate(desc,len),'.zip')
+  ,
+  desc=''
+  ,
+  len=10
 ) {
   mycmd <- paste0('zip -j -m ',root,'/',zname,' ',root,'/rd/*.RData')
+  if(verbose) message(mycmd)
   shell(mycmd)
 }
 
@@ -120,7 +127,7 @@ doziprd <- function(
 dirziprd <- function(
   root=rdroot()
   ,
-  zpatt='^20[0-9]{12}.zip$' #20 + 12 digits
+  zpatt='^20[0-9]{12}-.+.zip$' #20 + 12 digits
 ) {
   dd <- dir(paste0(root,'/'))
   dd[grep(zpatt,dd)]
