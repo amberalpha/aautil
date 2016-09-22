@@ -1,5 +1,5 @@
 
-#' @export 
+#' @export
 dern <- function(root = root.global, n = "001", type = c("BDH", "BDP", "macro")) {
     type <- match.arg(type)
     paste0(root, type, "/derive-", n, "/")
@@ -108,7 +108,7 @@ descrd <- function(i=idxrd()) {
 
 #' @export
 doziprd <- function(
-  root=rdroot()
+  root=ifelse(aabb,getOption('aa.path'),rdroot())
   ,
   verbose=getverbose()
   ,
@@ -117,8 +117,15 @@ doziprd <- function(
   desc=''
   ,
   len=10
+  ,
+  aabb=F
 ) {
-  mycmd <- paste0('zip -j -m ',root,'/',zname,' ',root,'/rd/*.RData')
+  if(aabb) { #source data
+    root <- getOption('aa.path')
+    mycmd <- paste0('zip -r -q -1 ',root,'/',zname,' ',root)
+  } else {
+    mycmd <- paste0('zip -j -m ',root,'/',zname,' ',root,'/rd/*.RData')
+  }
   if(verbose) message(mycmd)
   shell(mycmd)
 }
@@ -135,7 +142,7 @@ dirziprd <- function(
 
 #' @export
 unziprd <- function(
-  root=rdroot() 
+  root=rdroot()
   ,
   zf=rev(sort(dirziprd(root)))[1]
 ) {
@@ -656,7 +663,7 @@ extractDates <- function(dates, weekday = FALSE, find = c("all", "last", "first"
         theperiod <- as.POSIXlt(dates[myindex1])$year
         dayinperiod <- as.POSIXlt(dates[myindex1])$yday
     } else if (period == "week") {
-        warning('week believed broken at yearends!') #not sure of the evidence for this 2016-08 as derca('1900-01-01') does a fine series each time aautil loaded 
+        warning('week believed broken at yearends!') #not sure of the evidence for this 2016-08 as derca('1900-01-01') does a fine series each time aautil loaded
         theweek <- as.numeric(format(as.POSIXct(dates[myindex1]), "%U"))
         theyear <- as.numeric(format(dates[myindex1], "%Y"))
         incorrectPartialWeek <- theweek == 0
@@ -1803,7 +1810,16 @@ tgt.solve.QP <- function(
 }
 
 #combine y with an x lag distribution ; return single zoo
-
+#' @export
+putp <- function(
+          fname='./pars/pars1/csv'
+          ) {
+  # ii  driver  iseq  sname pname  pvalue     pmode     desc  values
+  # 1   .       1     .     run    T          logical   NA    NA
+  # 1   .       1     .     btki   cac        character NA    NA
+  pars <- data.table(read.csv('./pars/pars1.csv'))
+  putt(pars)
+}
 
 #' @export
 getp <- function(sname1=NULL,pname1=NULL,pars=gett('pars'),j='pvalue') {
@@ -1990,7 +2006,7 @@ setchk <- function(x=T) {
 
 #' @export
 getchk <- function() {
-  if(!exists('global.chk') || !is.logical(global.chk) || !global.chk) { 
+  if(!exists('global.chk') || !is.logical(global.chk) || !global.chk) {
     return(FALSE)
   } else {
     return(TRUE)
@@ -2005,7 +2021,7 @@ setverbose <- function(x=T) {
 
 #' @export
 getverbose <- function() {
-  if(!exists('global.verbose') || !is.logical(global.verbose) || !global.verbose) { 
+  if(!exists('global.verbose') || !is.logical(global.verbose) || !global.verbose) {
     return(FALSE)
   } else {
     return(TRUE)
@@ -2021,7 +2037,7 @@ setreturn <- function(x=T) {
 
 #' @export
 getreturn <- function() {
-  if(!exists('global.return') || !is.logical(global.return) || global.return) { 
+  if(!exists('global.return') || !is.logical(global.return) || global.return) {
     return(TRUE)
   } else {
     return(FALSE)
@@ -2036,7 +2052,7 @@ setkeep <- function(x=T) {
 
 #' @export
 getkeep <- function() {
-  if(!exists('global.keep') || !is.logical(global.keep) || global.keep) { 
+  if(!exists('global.keep') || !is.logical(global.keep) || global.keep) {
     return(TRUE)
   } else {
     return(FALSE)
@@ -2080,9 +2096,9 @@ bdhbcon <- function() {
   dfl[[15]] <- data.frame(field = "best_esales_cur_yr", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
   dfl[[16]] <- data.frame(field = "best_px_sales_ratio", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
   dfl[[17]] <- data.frame(field = "best_current_ev_best_sales", adjustmentSplit = "TRUE", adjustmentNormal = "FALSE", currency = "USD")
-  
+
   x <- rbindlist(dfl)[, `:=`(field, toupper(field))]
-  x[, `:=`(subdir, paste0(substr(adjustmentSplit, 1, 1), substr(adjustmentNormal, 1, 1), ifelse(is.na(currency), "L", 
+  x[, `:=`(subdir, paste0(substr(adjustmentSplit, 1, 1), substr(adjustmentNormal, 1, 1), ifelse(is.na(currency), "L",
                                                                                                 "U")))]
   setkey(x, field, subdir)[]
 }
@@ -2129,7 +2145,7 @@ cutN <- function(X , n = 4){
     X,
     include.lowest = TRUE ,
     breaks = quantile(
-      X , 
+      X ,
       probs = (0:n)/n ,
       na.rm = TRUE )
     )
@@ -2151,15 +2167,15 @@ f_dowle2 = function(DT) {
 #' @export
 #' @examples
 #' \dontrun{
-#' 
+#'
 #' #the following are the norm for initialising directories - see deraabd for usage
-#' 
+#'
 #' #top-level directories
 #' newbddir(bdtopdir())
-#' 
+#'
 #' #timeseries directories
 #' newbddir(bdhbdir())
-#' 
+#'
 #' #point data directories, single key and dual key
 #' newbddir(bdp1dir())
 #' newbddir(bdp2dir())
@@ -2177,7 +2193,7 @@ newbddir <- function(x = bdtopdir(), hard = FALSE, root.local=unlist(options('aa
 #' Paths to destination directory tree upper levels
 #'
 #' Returns paths for directory creation
-#' 
+#'
 #' Paths describing subdirectories of root.local; start and end without slash or backslash delimiters
 #' Normally for internal use.
 #' @param top logical flag to return only the top-level directories
@@ -2187,7 +2203,7 @@ newbddir <- function(x = bdtopdir(), hard = FALSE, root.local=unlist(options('aa
 #' @family directory management
 
 bdtopdir <- function(top = FALSE) {
-  x <- c("BDH", "BDH/derive-000", "BDH/derive-001", "BDH/raw", "BDP", "BDP/derive-000", "BDP/key1", "BDP/key2", "BDS", 
+  x <- c("BDH", "BDH/derive-000", "BDH/derive-001", "BDH/raw", "BDP", "BDP/derive-000", "BDP/key1", "BDP/key2", "BDS",
          "macro", "macro/derive-000", "macro/raw")
   if (top) {
     x[!grepl(x = x, patt = "/")]
