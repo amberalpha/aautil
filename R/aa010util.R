@@ -1822,7 +1822,15 @@ putp <- function(
 }
 
 #' @export
-getp <- function(sname1=NULL,pname1=NULL,pars=gett('pars'),j='pvalue') {
+getp <- function(
+          sname1=NULL
+          ,
+          pname1=NULL
+          ,
+          pars=gett('pars')
+          ,
+          j='pvalue'
+          ) {
   if(is.null(sname1)&is.null(pname1)) return(NULL)
   text1 <- ifelse(is.null(sname1),'TRUE',paste0('sname==sname1'))
   text2 <- ifelse(is.null(pname1),'TRUE',paste0('pname== pname1'))
@@ -1830,11 +1838,55 @@ getp <- function(sname1=NULL,pname1=NULL,pars=gett('pars'),j='pvalue') {
   if(j=='pvalue') {
     x <- pars[eval(parse(text=text)),]
     if(nrow(x)==0) return(NULL) #dk why it hangs otherwise
-    x <- x[,x:=as(pvalue,pmode),iseq][,x]
+    x1 <- x[,result:=ifelse(pmode=='Date',as.Date(pvalue),as(pvalue,pmode)),iseq][,result]
+    if(x[,all(pmode=='Date')]) class(x1) <- 'Date'
   } else {
-    x <- setkey(pars[eval(parse(text=text)),],pname)[]
+    x1 <- setkey(pars[eval(parse(text=text)),],pname)[]
   }
-  x
+  x1
+}
+chkgetp <- function() {
+    pars <-
+      structure(list(ii = c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
+      1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L), driver = c(".", ".", ".", ".",
+      ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".",
+      "."), iseq = c(1L, 1L, 2L, 3L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
+      1L, 1L, 1L, 1L, 2L, 3L), sname = c(".", ".", ".", ".", ".", ".",
+      ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "."),
+      pname = c("run", "btki", "btki", "btki", "wind", "qu1", "dumo",
+      "d0", "dlend", "dlwin", "rollce", "rollbest", "falag", "rankscaleexpo",
+      "indu", "jneut", "jneut", "jneut"), pvalue = c("T", "cac",
+      "dax", "smi", "2556.75", "U12422988-235", "6", "2006-03-03",
+      "max(wblf())", "7300", "76", "3", "2", "0", "ICB_SUBSECTOR_NAME",
+      "ICB_SUBSECTOR_NAME", "bcpr", "INDUSTRY_SUBGROUP_NUM"), pmode = c("logical",
+      "character", "character", "character", "numeric", "character",
+      "numeric", "Date", "character", "numeric", "numeric", "numeric",
+      "numeric", "numeric", "character", "character", "character",
+      "character"), desc = c(NA, NA, NA, NA, NA, NA, NA, NA, NA,
+      NA, NA, NA, NA, NA, NA, NA, NA, NA), values = c(NA, NA, NA,
+      NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA
+      )), .Names = c("ii", "driver", "iseq", "sname", "pname",
+      "pvalue", "pmode", "desc", "values"), row.names = c(NA, -18L), class = c("data.frame"))
+    pars <- data.table(pars)
+    for(i in seq_along(pars[,pname])) {
+      pn <- pars[i,pname]
+      pm <- pars[i,pmode]
+      stopifnot(class(getp(pn=pn,pars=pars))==pm)
+    }
+    stopifnot(getp(pname='jneut',pars=pars)==c("ICB_SUBSECTOR_NAME","bcpr","INDUSTRY_SUBGROUP_NUM"))
+    T
+}
+
+#get all pars into global variables - this is a one-way trip
+#' @export
+getpg <- function(
+            pars=gett('pars')
+          ) {
+  for(i in seq_along(pars[,pname])) {
+    pname <- pars[i,pname]
+    pvalue <- getp(pn=pars[i,pname],pars=pars)
+    assign(x=paste0(pname,'.g'),value=pvalue,env=globalenv())
+  }
 }
 
 #' @export
