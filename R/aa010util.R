@@ -122,7 +122,7 @@ doziprd <- function(
 ) {
   if(aabb) { #source data
     root <- getOption('aa.path')
-    mycmd <- paste0('zip -r -q -1 ',root,'/',zname,' ',root)
+    mycmd <- paste0('zip -r -q -1 ',root,'/',zname,' ',root,' -x *.zip')
   } else {
     mycmd <- paste0('zip -j -m ',root,'/',zname,' ',root,'/rd/*.RData')
   }
@@ -2323,28 +2323,30 @@ run <- function(
   if(returnit) return(x)
 }
 
-#improved version of run(), allows printing
+#this could be rationalised along with pars protocol
 #' @export
 do <- function(
   ty='tst'
   ,
   doit=getglobal('do')
   ,
-  returnit={is(x,'ggvis')|is(x,'data.table')|doit=='key'}
+  returnit=getglobal('return')#{is(x,'ggvis')|is(x,'data.table')|doit=='key'}
+  ,
+  assignit=getglobal('assign')
 ) {
   x <- NULL
   switch(doit
          ,
          run={
            x <- do.call(paste0(ty,'Fun'),args=list())
-           assign(paste0(ty,'d'),x,envir=globalenv())
-           return(x)
+           if(assignit) { assign(paste0(ty,'d'),x,envir=globalenv()) }
+           if(returnit) { return(x) }
          }
          ,
          get={
            x <- gett(paste0(ty,'d'))
-           assign(paste0(ty,'d'),x,envir=globalenv())
-           return(x)
+           if(assignit) { assign(paste0(ty,'d'),x,envir=globalenv()) }
+           if(returnit) { return(x) }
          }
          ,
          print={print(get(paste0(ty,'Fun')))}
