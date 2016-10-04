@@ -134,7 +134,7 @@ doziprd <- function(
 dirziprd <- function(
   root=rdroot()
   ,
-  zpatt='^20[0-9]{12}-.+.zip$' #20 + 12 digits
+  zpatt='^20[0-9]{12}-.+' #20 + 12 digits and -
 ) {
   dd <- dir(paste0(root,'/'))
   dd[grep(zpatt,dd)]
@@ -2302,7 +2302,10 @@ setglobal <- function(
 getglobal <- function(
   x='run'
 ) {
-  get(paste0(x,'.g'),value,envir=globalenv())
+  x0 <- paste0(x,'.g')
+  if(!exists(x0,envir=globalenv())) return(NULL)
+  x1 <- get(x0,value,envir=globalenv())
+  x1
 }
 
 
