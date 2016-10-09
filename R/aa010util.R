@@ -233,10 +233,10 @@ putt <- function(x,ty=deparse(substitute(x)),save=getkeep(),ret=getreturn(),chk=
   if(save) { putrdatv(x,ty=ty) }
   fun <- paste0(ty,'chk')
   if(chk && exists(fun) && is.function(get(fun)) ) {
-    if(verbose) {print(paste0('check: ',fun))}
+    if(verbose) {message(paste0('check: ',fun))}
     do.call(fun,list(x=x))
   }
-  if(ret) return(x)
+  if(ret) return(x[])
 }
 
 #put a named list
@@ -1812,12 +1812,13 @@ tgt.solve.QP <- function(
 #combine y with an x lag distribution ; return single zoo
 #' @export
 putp <- function(
-          fname='./pars/pars1/csv'
+          fname='./pars/pars1.csv'
           ) {
   # ii  driver  iseq  sname pname  pvalue     pmode     desc  values
   # 1   .       1     .     run    T          logical   NA    NA
   # 1   .       1     .     btki   cac        character NA    NA
-  pars <- data.table(read.csv('./pars/pars1.csv'))
+  pars <- data.table(read.csv(fname))
+  setkey(pars,pname,iseq)[,ii:=1:.N][,iseq:=1:.N] #added for po4 - should not break other uses
   putt(pars)
 }
 
