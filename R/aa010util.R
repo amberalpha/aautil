@@ -236,7 +236,7 @@ putt <- function(x,ty=deparse(substitute(x)),save=getkeep(),ret=getreturn(),chk=
     if(verbose) {message(paste0('check: ',fun))}
     do.call(fun,list(x=x))
   }
-  if(ret) return(x[])
+  if(ret) return(x)
 }
 
 #put a named list
