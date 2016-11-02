@@ -663,7 +663,7 @@ extractDates <- function(dates, weekday = FALSE, find = c("all", "last", "first"
         theperiod <- as.POSIXlt(dates[myindex1])$year
         dayinperiod <- as.POSIXlt(dates[myindex1])$yday
     } else if (period == "week") {
-        warning('week believed broken at yearends!') #not sure of the evidence for this 2016-08 as derca('1900-01-01') does a fine series each time aautil loaded
+        #warning('week believed broken at yearends!') #not sure of the evidence for this 2016-08 as derca('1900-01-01') does a fine series each time aautil loaded
         theweek <- as.numeric(format(as.POSIXct(dates[myindex1]), "%U"))
         theyear <- as.numeric(format(dates[myindex1], "%Y"))
         incorrectPartialWeek <- theweek == 0
@@ -703,7 +703,7 @@ extractDates <- function(dates, weekday = FALSE, find = c("all", "last", "first"
     return(dates[myindex])
 }
 
-#' table to matrix
+#' table to matrix [should use dcast instead]
 #'
 #' @export
 tabtomat <- function(x) {
@@ -834,7 +834,7 @@ zootodt <- function(z = dttozoo(), field = "x") {
     setkey(setcolorder(data.table(mattotab(z, field = field))[, `:=`(date, as.Date(date))], c(2, 1, 3)), bui, date)[]
 }
 
-
+#should use melt
 #' @export
 mattotab <- function(x, field = "field", fieldmode = "numeric", rclabel = c("date", "bui")) {
     stopifnot(!is.null(rownames(x)) && all(!duplicated(rownames(x))))
