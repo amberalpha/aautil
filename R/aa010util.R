@@ -412,14 +412,23 @@ getv <- function() {
 #' \dontrun{
 #' newrd()
 #' }
-newrd <- function(hard=FALSE) {
+newrd <- function(
+  hard=FALSE
+  ,
+  dobics=T #retained for backward compatibility
+  ) {
     if(hard) {
       shell(paste0("rd /s /q ",rdroot(),"\\rd"))
       #load("./RD/bics.RData")
     }
+  if(dobics) {
     bics <- bicsdump()
     system(paste0("mkdir ", rdroot(), "/rd"))
     putrd(bics, "bicsindustrydescription", i = 0)
+  } else { #this opens the possibility of not using bicsdump() to initialise, but still leaves it as default and leaves the function in aautil and leaves the repeated idx=0 bug and is untested
+    bics <- 0
+    putrd(bics, "dummy", i = 0, usedesc=T)
+  }
 }
 #' get
 #'
@@ -2355,4 +2364,9 @@ do <- function(
          ,
          print={print(get(paste0(ty,'Fun')))}
   )
+}
+
+#' @export
+chksolve <- function() {
+  stopifnot(solve(matrix(1,1,1))[1,1]==1)
 }
