@@ -1892,6 +1892,8 @@ chkgetp <- function() {
 getpg <- function(
             pars=gett('pars')
           ) {
+  ll <- ls(env=globalenv())
+  rm(list=ll[grepl('\\.g$',ll)]) #delete existing
   for(i in seq_along(pars[,pname])) {
     pname <- pars[i,pname]
     pvalue <- getp(pn=pars[i,pname],pars=pars)
