@@ -2372,3 +2372,9 @@ do <- function(
 chksolve <- function() {
   stopifnot(solve(matrix(1,1,1))[1,1]==1)
 }
+
+#' @export
+print100 <- function(i,eachi=100,firsti=3) {
+  if((i%%eachi)==1|i<=firsti) print(i)
+  if(i==firsti) cat('...\n')
+}
