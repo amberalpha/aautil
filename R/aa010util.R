@@ -1818,17 +1818,23 @@ tgt.solve.QP <- function(
   list(root=root,solution=sol)
 }
 
-#combine y with an x lag distribution ; return single zoo
 #' @export
 putp <- function(
           fname='./pars/pars1.csv'
           ) {
+  pars <- readp(fname)
+  putt(pars)
+}
+
+#' @export
+readp <- function(
+  fname='./pars/pars1.csv'
+) {
   # ii  driver  iseq  sname pname  pvalue     pmode     desc  values
   # 1   .       1     .     run    T          logical   NA    NA
   # 1   .       1     .     btki   cac        character NA    NA
   pars <- data.table(read.csv(fname))
-  setkey(pars,pname,iseq)[,ii:=1:.N][,iseq:=1:.N] #added for po4 - should not break other uses
-  putt(pars)
+  setkey(pars,pname,iseq)[,ii:=1:.N][,iseq:=1:.N][] #added for po4 - should not break other uses
 }
 
 #' @export
@@ -1892,8 +1898,8 @@ chkgetp <- function() {
 getpg <- function(
             pars=gett('pars')
           ) {
-  ll <- ls(env=globalenv())
-  rm(list=ll[grepl('\\.g$',ll)]) #delete existing
+  ll <- setdiff(ls(envir=globalenv()),'ver.g')
+  rm(list=ll[grepl('\\.g$',ll)],envir=globalenv()) #delete existing
   for(i in seq_along(pars[,pname])) {
     pname <- pars[i,pname]
     pvalue <- getp(pn=pars[i,pname],pars=pars)
@@ -2203,15 +2209,26 @@ putbdw <- function(logdt) {
 #quick quantile
 #' @export
 cutN <- function(X , n = 4){
-  if(sd(X)==0) return(rep(ceiling(n/2),length(X)))
+  if(sd(X)==0 |
+     length(unique(X))<n |
+     any(duplicated(quantile(
+       X ,
+       probs = (0:n) / n ,
+       na.rm = TRUE
+     )))
+     ) {
+    return(rep(ceiling(n / 2), length(X)))
+  }
+  qq <- quantile(
+    X ,
+    probs = (0:n)/n ,
+    na.rm = TRUE )
+  stopifnot(!any(duplicated(qq)))
   as.numeric(
     cut(
     X,
     include.lowest = TRUE ,
-    breaks = quantile(
-      X ,
-      probs = (0:n)/n ,
-      na.rm = TRUE )
+    breaks = qq
     )
   )
 }
@@ -2377,4 +2394,50 @@ chksolve <- function() {
 print100 <- function(i,eachi=100,firsti=3) {
   if((i%%eachi)==1|i<=firsti) print(i)
   if(i==firsti) cat('...\n')
+}
+
+#' @export
+attribdump <- function() {
+  structure(
+    list(
+      part = c("position", "position", "position", "position", "position", "position", "position",
+               "return", "return"),
+      dimension = c(
+        "strategy",
+        "source",
+        "polarity",
+        "industry",
+        "quantile",
+        "longevity",
+        "dynamic",
+        "component",
+        "dynamic"
+      ),
+      values = c(
+        "a/b/c",
+        "index ticker",
+        "long/short",
+        "BICS code",
+        "quartile 1:4",
+        "dead/keep/newbie/transient",
+        "bar/twiddle",
+        "market/systematic/residual",
+        "bar/twiddle"
+      ),
+      description = c(
+        "alpha strategy",
+        "ticker",
+        "long/short",
+        "sector code",
+        "1:4",
+        "path through universe",
+        "mean or deviation from mean",
+        "factor 1,2:k,other",
+        "mean or deviation from mean"
+      )
+    ),
+    .Names = c("part", "dimension", "values", "description"),
+    class = "data.frame",
+    row.names = c(NA, -9L)
+  )
 }
