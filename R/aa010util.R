@@ -2239,6 +2239,12 @@ f_dowle2 = function(DT) {
   DT
 }
 
+#faster and avoids deprecated :=,with=F (from SO of course)
+#' @export
+f_dowle3 = function(DT) {
+  for (j in seq_len(ncol(DT))) {set(DT,which(is.na(DT[[j]])),j,0) }
+  DT
+}
 
 
 #' Create directories from pathnames
@@ -2270,6 +2276,13 @@ newbddir <- function(x = bdtopdir(), hard = FALSE, root.local=unlist(options('aa
   nul <- lapply(paste0(root.local, x[order(nchar(x))]), mkdirn)
 }
 
+#dangerous deleter - cleans up empty dirs http://superuser.com/questions/39674/recursively-delete-empty-directories-in-windows
+#' @export
+trimleaves <- function(aapath=unlist(options('aa.path'))) {
+  stopifnot(rev(strsplit(aapath,'\\\\')[[1]])[1:2]=='aabb') #safety mechanism for the maddeleter - aa.path must end aabb/aabb/!
+  mycmd <- paste('ROBOCOPY ',aapath,aapath,'/S /MOVE')
+  shell(mycmd)
+}
 
 #' Paths to destination directory tree upper levels
 #'
@@ -2303,9 +2316,10 @@ bdtopdir <- function(top = FALSE) {
 #' bdhbdir()
 #' }
 #' @family directory management
-bdhbdir <- function(flds = bdhbcon()) {
+bdhbdir <- function(flds = bdhbcon(),aapath=F) {
   x <- paste0("BDH/raw/", flds[, field], "/", flds[, subdir])
   x <- c(x, paste0("BDH/raw/", flds[, field]))
+  if(aapath) x <- paste0(unlist(options('aa.path')),x)
   x[order(nchar(x))]
 }
 
