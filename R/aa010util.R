@@ -239,6 +239,26 @@ putt <- function(x,ty=deparse(substitute(x)),save=getkeep(),ret=getreturn(),chk=
   if(ret) return(x)
 }
 
+#preferred accessor in step args
+#' @export
+getx <- function(...) {gett(...)}
+# getx <- function(...) {
+#   x <- lapply(sys.calls(),as.character)
+#   callfun <- x[[length(x)-2]][1] #-2 because force() is at -1
+#   starttime(callfun)
+#   gett(...)
+# }
+
+#preferred final save in step
+#' @export
+putx <- function(...) {
+  x <- lapply(sys.calls(),as.character)
+  callfun <- x[[length(x)-1]][1]
+  endtime(callfun)
+  putt(...)
+}
+
+
 #put a named list
 #' @export
 putl <- function(x=list(a=1,b=2)) {

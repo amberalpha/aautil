@@ -4,6 +4,9 @@ require(testthat)
 require(lrmest)
 aatopselect('test')
 
+#getx, starttime, putx collaborate as expected
+setv(app='test',ver=0)
+
 
 irdstart <- ird <- as.numeric(dirrd()[,max(num)])
 
