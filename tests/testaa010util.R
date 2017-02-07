@@ -6,7 +6,30 @@ aatopselect('test')
 
 #getx, starttime, putx collaborate as expected
 setv(app='test',ver=0)
-
+putrdatv(LETTERS,type='xxd')
+testFun <- function(xxd=getx('xxd')) { #1 *Fun 2 getx('**d')
+  starttime('testFun') #3 starttime('*Fun')
+  x <- tolower(xxd)
+  Sys.sleep(1)
+  testd=x #4 *d=
+  putx(testd) #5 putx(*d)
+}
+test1Fun <- function(xxd=getx('xxd')) { #1 *Fun 2 getx('**d')
+  starttime('test1Fun') #3 starttime('*Fun')
+  x <- tolower(xxd)
+  Sys.sleep(1)
+  test1d=x #4 *d=
+  putx(test1d) #5 putx(*d)
+}
+newtime()
+tt0 <- showtime()
+testFun()
+test1Fun()
+tt <- showtime()
+expect(nrow(tt)==2,'timed object unexpected')
+expect(all(tt[,type]==c('testFun','test1Fun')),'timed object unexpected')
+expect(all(tt[,secs]>=1),'timed object unexpected')
+expect(is.null(tt0),'timed object not reset')
 
 irdstart <- ird <- as.numeric(dirrd()[,max(num)])
 
