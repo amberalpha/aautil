@@ -227,37 +227,24 @@ memrdatv <- function(memuse=FALSE,winenable=FALSE) { #only applies to rdatv,gett
 
 #' @export
 gett <- function(ty) {getrdatv(ty=ty)} #this should be same as other copies and put in util
+#' @export
+getx <- gett
 
 #' @export
-putt <- function(x,ty=deparse(substitute(x)),save=getkeep(),ret=getreturn(),chk=getchk(),verbose=getverbose()) {
+putt <- function(x,ty=deparse(substitute(x)),save=getkeep(),ret=getreturn(),chk=getchk(),verbose=getverbose(),timer=T) {
   if(save) { putrdatv(x,ty=ty) }
   fun <- paste0(ty,'chk')
   if(chk && exists(fun) && is.function(get(fun)) ) {
     if(verbose) {message(paste0('check: ',fun))}
     do.call(fun,list(x=x))
   }
+  if(timer) {
+    endtime(paste0(substr(ty,1,nchar(ty)-1),'Fun'))
+  }
   if(ret) return(x)
 }
-
-#preferred accessor in step args
 #' @export
-getx <- function(...) {gett(...)}
-# getx <- function(...) {
-#   x <- lapply(sys.calls(),as.character)
-#   callfun <- x[[length(x)-2]][1] #-2 because force() is at -1
-#   starttime(callfun)
-#   gett(...)
-# }
-
-#preferred final save in step
-#' @export
-putx <- function(...) {
-  x <- lapply(sys.calls(),as.character)
-  callfun <- x[[length(x)-1]][1]
-  endtime(callfun)
-  putt(...)
-}
-
+putx <- putt
 
 #put a named list
 #' @export
@@ -1967,7 +1954,7 @@ starttime <- function(typex='x') {
   if(!is.null(oldtimed)) oldtimed <- oldtimed[type!=typex]
   timed <- cbind(as.data.table(getv()),data.table(start=Sys.time(),end=Sys.time(),secs=0L))[,type:=typex]
   timed <- setkey(rbind(oldtimed,timed),type)
-  putt(timed)
+  putt(timed,time=F) #avoid recursion
 }
 
 #' @export
@@ -1977,7 +1964,7 @@ endtime <- function(typex='x') {
   timed[type==typex,end:=Sys.time()]
   timed[,secs:=round(as.numeric(end-start),1)]
   setkey(timed,start)
-  putt(timed)
+  putt(timed,time=F) #avoid recursion
 }
 
 #' @export
@@ -1995,7 +1982,7 @@ ttf <- function(x,args=list()) {
 deltime <- function(i) {
   timed <- showtime()
   timed <- timed[-i]
-  putt(timed)
+  putt(timed,time=F) #avoid recursion
 }
 
 #' add rownames to zoo
@@ -2474,4 +2461,10 @@ attribdump <- function() {
     class = "data.frame",
     row.names = c(NA, -9L)
   )
+}
+
+#' @export
+callname <- function(goback=1) {
+  x <- lapply(sys.calls(),as.character)
+  x[[length(x)-goback]][1]
 }
