@@ -231,7 +231,7 @@ gett <- function(ty) {getrdatv(ty=ty)} #this should be same as other copies and 
 getx <- gett
 
 #' @export
-putt <- function(x,ty=deparse(substitute(x)),save=getkeep(),ret=getreturn(),chk=getchk(),verbose=getverbose(),timer=T) {
+putt <- function(x,ty=deparse(substitute(x)),save=getkeep(),ret=getreturn(),chk=getchk(),verbose=getverbose(),timer=F) {
   if(save) { putrdatv(x,ty=ty) }
   fun <- paste0(ty,'chk')
   if(chk && exists(fun) && is.function(get(fun)) ) {
@@ -2468,3 +2468,13 @@ callname <- function(goback=1) {
   x <- lapply(sys.calls(),as.character)
   x[[length(x)-goback]][1]
 }
+
+#' @export
+natox <-function(x,value=0)
+  {
+    stopifnot(is.zoo(x))
+    xx <- coredata(x)
+    xx[is.na(xx)] <- value
+    zoo(xx,index(x))
+  }
+
