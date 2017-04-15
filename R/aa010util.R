@@ -180,12 +180,11 @@ putrdatv <- function(x,app=getv()$app,type=getv()$type,ver=getv()$ver,i = idxrd(
     desc <- descrdatv(app=app,typ=type,ver=ver)#app,type,ver
     assign(x=desc,value=x,envir=.rdenv) #instead of write
   } else {
-    ii <- greprdatv(app=app,typ=type,ver=ver)
-    if((0<length(ii)) & over) {
-      i <- max(ii)
-      delrd(i=ii)
-    }
-    #putrd(x,desc=paste0('app',app,'type',type,'ver',ver),i=i)
+    # ii <- greprdatv(app=app,typ=type,ver=ver) #not needed
+    # if((0<length(ii)) & over) {
+    #   i <- max(ii)
+    #   delrd(i=ii)
+    # }
     putrd(x,desc=descrdatv(app,type,ver),i=i)
   }
 }
@@ -995,7 +994,9 @@ nonasu <- function(x = nonadt(), nda = x[, length(unique(date))], nbui = x[, len
 
 #' @export
 sfLapplyWrap <- function(X, FUN, ...) {
-    sfLapply(x = X, fun = FUN, ...)
+  result <- sfLapply(x = X, fun = FUN, ...)
+  sfStop()
+  result
 }
 
 # mkdirn - make one directory
