@@ -180,11 +180,11 @@ putrdatv <- function(x,app=getv()$app,type=getv()$type,ver=getv()$ver,i = idxrd(
     desc <- descrdatv(app=app,typ=type,ver=ver)#app,type,ver
     assign(x=desc,value=x,envir=.rdenv) #instead of write
   } else {
-    # ii <- greprdatv(app=app,typ=type,ver=ver) #not needed
-    # if((0<length(ii)) & over) {
-    #   i <- max(ii)
-    #   delrd(i=ii)
-    # }
+    ii <- greprdatv(app=app,typ=type,ver=ver) #not needed
+    if((0<length(ii)) & over) {
+      i <- max(ii)
+       delrd(i=ii)
+    }
     putrd(x,desc=descrdatv(app,type,ver),i=i)
   }
 }
