@@ -2409,7 +2409,8 @@ do <- function(
 
 #' @export
 chksolve <- function() {
-  stopifnot(solve(matrix(1,1,1))[1,1]==1)
+  x <- solve(matrix(1,1,1))[1,1]
+  stopifnot(!is.null(x) && x==1)
 }
 
 #' @export
