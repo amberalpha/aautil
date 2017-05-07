@@ -16,6 +16,5 @@ Depends:
     testthat,
     rappdirs,
     RColorBrewer,
-    devtools,
-    beepr
+    devtools
 RoxygenNote: 5.0.1
