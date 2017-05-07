@@ -509,7 +509,7 @@ delrd <- function(i = idxrd()) {
     for(j in seq_along(i)) {
       n <- formatC(i[j], width = 5, format = "d", flag = "0")
       fnam <- paste0(paste0(dirrd()[n], collapse = rddelim()), ".RData")
-      shell(paste0("rm \"", paste0(rdroot(), "/rd/", fnam, "\"")))
+      system(paste0("rm \"", paste0(rdroot(), "/rd/", fnam, "\"")))
     }
 }
 
