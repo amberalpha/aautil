@@ -1546,6 +1546,19 @@ sdlcurv <- function(nn)
   dum[ij] <- 1
   dum
 }
+
+#sdlslope - finite difference slope, primarily for final period in aappd
+#' @export
+sdlslope <- function(nn)
+{
+  dum <- matrix(0,nn-1,nn)
+  ij <- cbind(1:(nn-1),1:(nn-1))
+  dum[ij] <- 1
+  ij[,2] <- ij[,2]+1
+  dum[ij] <- -1
+  dum
+}
+
 #' @export
 offda.sdl <- function(x,                      #dateseries
                       lags=0,                     #lagrange
