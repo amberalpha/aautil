@@ -323,3 +323,4 @@ x4 <- x3[nrow(x3)+(-2:0)]
 x <- x4[,expect_equal(sec,c(1,2,2))]
 x <- x4[,expect_equal(field,c(1,1,2))]
 x <- x4[,expect_equal(fn,c('bdp','bdh','bdh'))]
+
