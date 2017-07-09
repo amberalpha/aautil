@@ -104,6 +104,24 @@ expect_equal(gett('x'),x)
 irdend <- idxrd()
 if(irdend>irdstart) delrd((irdstart+1):irdend)
 
+#--------getgd
+x <- letters
+putt(x)
+steptest <- function(nn='x') {
+  x1=NULL;for(i in seq_along(nn)) if(!exists(nn,envir=globalenv())) x1[length(x1)+1]=nn[i];x1
+  getgd(nn)
+  max(x1)
+}
+rm(x)
+expect_false(exists('x'))
+steptest()
+expect_true(exists('x'))
+rm(x)
+expect_false(exists('x'))
+steptest('x')
+expect_true(exists('x'))
+
+
 #memonly parts
 memrdatv(F)
 dirrd()

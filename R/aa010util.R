@@ -2722,3 +2722,17 @@ structure(list(X = c(9L, 18L, 19L, 21L, 25L, 27L, 30L, 32L, 34L,
 "EMEA", "Americas", "Americas", "Americas")), .Names = c("X", 
 "ISO2", "ISO3", "name", "region"), row.names = c(NA, -40L), class = "data.frame")
 }
+
+#' @export
+getgd <- function(x,verbose=T) {
+  #this is how called inside a step to get all args out of rd and into globalenv
+  #NOT WORKS: x0 <- names(formals());x1=NULL;for(i in seq_along(x0)) if(do.call(missing, list(x0[i]))) x1[length(x1)+1]=x0[i];x1
+  #getgd(nn)
+  x1 <- x[!sapply(x,exists,envir=globalenv())]
+  for(i in seq_along(x1)) {
+    if(nrow(ddv1(ty=x1[i]))==0) stop(paste0(x1[i],' not found on rd'))
+    if(verbose) print(paste0('getting ',x1[i]))
+    assign(x1[i],gett(x1[i]),envir=globalenv())
+    if(is.null(get(x1[i],envir=globalenv()))) stop(paste0('argument ',names(x1)[i],' not found on rd'))
+  }
+}
