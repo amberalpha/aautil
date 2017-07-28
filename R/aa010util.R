@@ -2434,7 +2434,7 @@ do <- function(
 #' @export
 chksolve <- function() {
   x <- solve(matrix(1,1,1))[1,1]
-  stopifnot(!is.null(x) && x==1)
+  stopifnot(!is.null(x) && is(x,'numeric') && x==1)
 }
 
 #' @export

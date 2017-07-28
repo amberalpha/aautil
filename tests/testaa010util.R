@@ -333,6 +333,7 @@ options=c(
   nonTradingDayFillMethod="NIL_VALUE"
 )
 
+#this section not wkg
 bdw('barc ln equity','name')
 bdw(c('barc ln equity','ulvr ln equity'),'px_last',start=start,end=end,options=options,fn='bdh')
 bdw(c('barc ln equity','ulvr ln equity'),c('px_last','px_volume'),start=start,end=end,options=options,fn='bdh')
