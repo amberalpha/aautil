@@ -513,6 +513,10 @@ delrd <- function(i = idxrd()) {
     }
 }
 
+#' @export
+delrdv <- function(savever=c(0,30:40)) {
+  delrd(dirrd()[!grepl( paste0(paste0('ver',paste0(sapply(savever,zeroprepend,5),'$')),collapse='|'),des),as.numeric(num)])
+}
 #' grep
 #'
 #' grep for pattern in des
