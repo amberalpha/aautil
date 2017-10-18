@@ -2733,6 +2733,7 @@ getgd <- function(x,verbose=T) {
   #NOT WORKS: x0 <- names(formals());x1=NULL;for(i in seq_along(x0)) if(do.call(missing, list(x0[i]))) x1[length(x1)+1]=x0[i];x1
   #getgd(nn)
   #can't easily check for vbles which are NULL, which should be treated same as missing
+  stopifnot(is.logical(verbose))
   x1 <- x[!sapply(x,exists,envir=globalenv())]
   for(i in seq_along(x1)) {
     if(nrow(ddv1(ty=x1[i]))==0) stop(paste0(x1[i],' not found on rd'))
