@@ -2742,3 +2742,22 @@ getgd <- function(x,verbose=T) {
     if(is.null(get(x1[i],envir=globalenv()))) stop(paste0('argument ',names(x1)[i],' not found on rd'))
   }
 }
+
+#' @export
+getcomments = function(filename='R/step.R',patt="^\\s*#"){
+  # - [ ] pcode - comments formatted like this, or with an x thus: [x] extracted into a named list
+  is_assign = function(expr) as.character(expr) %in% c("<-", "<<-", "=", "assign")
+  is_function = function(expr) is.call(expr) && is_assign(expr[[1L]]) && is.call(expr[[3L]]) && expr[[3L]][[1L]] == quote(`function`)
+  src = parse(filename, keep.source = TRUE)
+  functions = Filter(is_function, src)
+  fun_names = as.character(lapply(functions, `[[`, 2L))
+  # - [x] extract all comments
+  r = setNames(lapply(attr(functions, "srcref"), grep, pattern = patt, value = TRUE), fun_names)
+  # - [x] remove leading spaces and comment sign '#'
+  r = lapply(r, function(x) sub(pattern = patt, replacement = "", x = x))
+  # - [x] keep only markdown checkboxes like " - [ ] " or " - [x] "
+  r = lapply(r, function(x) x[nchar(x) >= 7L & substr(x, 1L, 7L) %in% c(" - [ ] "," - [x] ")])
+  # - [x] return only non empty results
+  r[as.logical(sapply(r, length))]
+}
+
