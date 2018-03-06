@@ -1,4 +1,4 @@
- 
+
 #' @export
 dern <- function(root = root.global, n = "001", type = c("BDH", "BDP", "macro")) {
     type <- match.arg(type)
