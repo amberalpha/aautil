@@ -78,7 +78,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 putrd <- function(x, desc = deparse(substitute(x)), i = idxrd() + 1,usedesc=FALSE) {
     if(usedesc && 'desc'%in%names(attributes(x))) { desc <- attr(x,'desc') }
     n <- numtotxt(i) #formatC(i, width = 5, format = "d", flag = "0")
-    fnam <- paste(c(n, as.character(as.Date(Sys.time())), abbrev(desc)), collapse = rddelim())
+    fnam <- paste(c(n, as.character(as.Date(Sys.time())), abbrev(desc,len=35)), collapse = rddelim())
     if (i == 0) {
         save(x, file = paste0(rdroot(), "/rd/", fnam, ".RData"))
     } else {
