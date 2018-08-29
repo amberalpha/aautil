@@ -22,7 +22,8 @@ abbrev <- function(x, len = 30, rep = "", patt = list("\\.", "/", "&", "\\*", ":
     if (nospace)
         patt <- union(patt, " ")
     x <- abbreviate(x, minl = len)
-    for (i in 1:length(patt)) x <- gsub(x = x, patt = patt[i], rep = rep)
+    x <- gsub(x = x, patt = grepstring(patt,caret=F), rep = rep)
+    #for (i in 1:length(patt)) x <- gsub(x = x, patt = patt[i], rep = rep)
     x
 }
 
