@@ -2762,3 +2762,16 @@ getcomments = function(filename='R/step.R',patt="^\\s*#"){
   r[as.logical(sapply(r, length))]
 }
 
+#https://stackoverflow.com/questions/18427455/multiple-ggplots-of-different-sizes
+#' @export
+lay_out = function(...) {    
+  x <- list(...)
+  n <- max(sapply(x, function(x) max(x[[2]])))
+  p <- max(sapply(x, function(x) max(x[[3]])))
+  grid::pushViewport(grid::viewport(layout = grid::grid.layout(n, p)))    
+  
+  for (i in seq_len(length(x))) {
+    print(x[[i]][[1]], vp = grid::viewport(layout.pos.row = x[[i]][[2]], 
+                                           layout.pos.col = x[[i]][[3]]))
+  }
+} 
