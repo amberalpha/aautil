@@ -2775,3 +2775,23 @@ lay_out = function(...) {
                                            layout.pos.col = x[[i]][[3]]))
   }
 } 
+
+
+#' @export
+grepstring <- function(x=regpcode(metro()),dollar=F,caret=T) {
+  if(caret) x <- paste0('^',x)
+  if(dollar) x <- paste0(x,'$')
+  paste(x,collapse='|')
+}
+
+
+#' @export
+deltables <- function(nn=NULL){
+  if(is.null(nn)) {
+    nn <- data.table::tables(env=globalenv())
+    if(0<length(nn)) nn <- nn[,NAME]
+  }
+  if(length(nn)>0) {
+    rm(list=nn,envir=globalenv())
+  }
+}
