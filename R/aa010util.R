@@ -246,6 +246,45 @@ putt <- function(x,ty=deparse(substitute(x)),save=getkeep(),ret=getreturn(),chk=
 #' @export
 putx <- putt
 
+#' @export
+getvar <- function(
+    app=getv()$app,
+    type=getv()$type,
+    ver=getv()$ver,
+    instance=getv()$inst,
+    variant=getv()$var
+  ) {
+  # - [ ] extends 'type' with 1-digit 'instance' and 2-digit 'variant'
+  stopifnot(instance%in%(0:10)&variant%in%(0:100))
+  typextend <- paste0(type,instance,zeroprepend(variant,2))
+  ird <- greprdatv(app,typextend,ver)
+  if(0==length(ird)) return()
+  print(paste0('getting ',typextend,' from ',root.global,' index ',ird))
+  getrd(max(ird))
+}
+
+#' @export
+putvar <- function(
+    x,
+    app=getv()$app,
+    type=getv()$type,
+    ver=getv()$ver,
+    instance=getv()$inst,
+    variant=getv()$var
+  ) {
+  # - [ ] extends 'type' with 1-digit 'instance' and 2-digit 'variant'
+  typextend <- paste0(type,instance,zeroprepend(variant,2))
+  ii <- greprdatv(app=app,typ=typextend,ver=ver)
+  if((0<length(ii))) {
+    i <- max(ii)
+    delrd(i=i)
+  } else {
+    i <- idxrd() + 1
+  }
+  putrd(x,desc=descrdatv(app,typextend,ver),i=i)
+}
+
+
 #put a named list
 #' @export
 putl <- function(x=list(a=1,b=2)) {
@@ -385,8 +424,8 @@ putv <- function(app="jo",type="x",ver=1) {
 #' @param n number
 #' @keywords data
 #' @export
-setv <- function(app=getv()$app, type=getv()$type, ver=getv()$ver) {
-  ver.g <<- list(app=app,type=type,ver=ver)
+setv <- function(app=getv()$app, type=getv()$type, ver=getv()$ver, var=getv()$var, inst=getv()$inst) {
+  ver.g <<- list(app=app,type=type,ver=ver,var=var,inst=inst)
   if(exists('.memonly')&&.memonly) { #if .memonly, use .rdenv not filesystem
     #exists('.rdenv')&&is.environment(.rdenv)
     dd <- ddv(ondisk=T)
@@ -405,7 +444,7 @@ setv <- function(app=getv()$app, type=getv()$type, ver=getv()$ver) {
 #' @keywords data
 #' @export
 getv <- function() {
-  if(!exists("ver.g",envir=globalenv())) return(list(app="jo",type='x',ver=0))
+  if(!exists("ver.g",envir=globalenv())) return(list(app="jo",type='x',ver=0,var=0,inst=0))
   eval(expression(ver.g),envir=globalenv())
 }
 
