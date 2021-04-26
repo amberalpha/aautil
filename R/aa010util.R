@@ -257,6 +257,7 @@ getvar <- function(
   # - [ ] extends 'type' with 1-digit 'instance' and 2-digit 'variant'
   stopifnot(instance%in%(0:10)&variant%in%(0:100))
   typextend <- paste0(type,instance,zeroprepend(variant,2))
+  print(paste0('searching for ',typextend,' in app ',app,' ver ',ver,' location ',root.global))
   ird <- greprdatv(app,typextend,ver)
   if(0==length(ird)) return()
   print(paste0('getting ',typextend,' from ',root.global,' index ',ird))
