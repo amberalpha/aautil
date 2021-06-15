@@ -17,4 +17,4 @@ Depends:
     rappdirs,
     RColorBrewer,
     devtools
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
