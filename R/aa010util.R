@@ -7,6 +7,7 @@ dern <- function(root = root.global, n = "001", type = c("BDH", "BDP", "macro"))
 
 
 # rddelim - delimiter between fields in filename
+#' @export
 rddelim <- function() {
     "_"
 }
@@ -383,10 +384,12 @@ ddv <- function(ver=getv()$ver,app=getv()$app,ondisk=FALSE) { #return all dd mat
 ddv1 <- function(app=getv()$app,type=getv()$type,ver=getv()$ver) { #return all dd matching app,ver
   dd <- dirrd()[!is.na(des)]
   subg <- function(x){ifelse(x=='*','.+',x)}
-  ver <- paste0(prependrdatv(subg(ver)),'$')
-  app <- subg(app)
-  type <- subg(type)
-  i <- greprd(perl=T,patt=paste(paste(c('app','type','ver'),c(app,type,ver),sep=''),collapse=''),dirrd()[,des])
+  #ver <- paste0(prependrdatv(subg(ver),len=3),'$') #this will fail for high ird
+  verx <- paste0('[0]+',ifelse(ver=='*','',ver),'$') #any number of leading 0
+  appx <- subg(app)
+  typex <- subg(type)
+  #browser()
+  i <- greprd(perl=T,patt=paste(paste(c('app','type','ver'),c(appx,typex,verx),sep=''),collapse=''),dirrd()[,des])
   dd[zeroprepend(i,5)]
 }
 
@@ -470,7 +473,8 @@ newrd <- function(
     }
   if(dobics) {
     bics <- bicsdump()
-    system(paste0("mkdir ", rdroot(), "/rd"))
+    #system(paste0("mkdir ", rdroot(), "/rd"))
+    shell(paste0("mkdir ", rdroot(), "/rd"))
     putrd(bics, "bicsindustrydescription", i = 0)
   } else { #this opens the possibility of not using bicsdump() to initialise, but still leaves it as default and leaves the function in aautil and leaves the repeated idx=0 bug and is untested
     bics <- 0
@@ -550,7 +554,8 @@ delrd <- function(i = idxrd()) {
     for(j in seq_along(i)) {
       n <- formatC(i[j], width = 5, format = "d", flag = "0")
       fnam <- paste0(paste0(dirrd()[n], collapse = rddelim()), ".RData")
-      system(paste0("rm \"", paste0(rdroot(), "/rd/", fnam, "\"")))
+      file.remove(paste0(rdroot(), "/rd/", fnam))
+      #system(paste0("rm \"", paste0(rdroot(), "/rd/", fnam, "\"")))
     }
 }
 
@@ -699,7 +704,8 @@ zoonorm <- function(x, dimension = c("ts", "xs", "tsxs"), ...) {
 #' @export
 mkdirn <- function(dd) {
     if (all(is.na(file.info(dd))))
-        suppressWarnings(system(paste0("mkdir ", dd)))
+        #suppressWarnings(system(paste0("mkdir ", dd)))
+        suppressWarnings(shell(paste0("mkdir ", dd)))
 }
 
 
@@ -1044,12 +1050,11 @@ sfLapplyWrap <- function(X, FUN, ...) {
   result
 }
 
-# mkdirn - make one directory
-#' @export
-mkdirn <- function(dd) {
-    if (all(is.na(file.info(dd))))
-        suppressWarnings(system(paste0("mkdir ", dd)))
-}
+# mkdirn - make one directory DUP
+# mkdirn <- function(dd) {
+#     if (all(is.na(file.info(dd))))
+#         suppressWarnings(system(paste0("mkdir ", dd)))
+# }
 
 # aacol1 - color scale, for interpolating qualitative scale 'Set2' which can only have n<=8
 #' @export
@@ -2004,13 +2009,13 @@ getpall <- function(pars=gett('pars')) { #assigns all scalar pars in the global 
 }
 
 #' @export
-maxver <- function(ver='*',type='*') {
+maxver <- function(ver='[0-9]+',type='*') {
   max(as.numeric(unlist(lapply(strsplit(ddv1(v=ver,t=type)[,des],split='ver'),'[',2))))
 }
 
 #' @export
 getlast <- function(ty='edppd') {
-  getrd(ddv1(ty=ty,ver=maxver(ty=ty))[,as.numeric(num)])
+  getrd(ddv1(ty=ty,ver=maxver(ty=ty))[,as.numeric(num)]) #
 }
 
 #----timing protocol
