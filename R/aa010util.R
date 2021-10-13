@@ -2841,3 +2841,18 @@ deltables <- function(nn=NULL){
   }
 }
 
+#' @export
+rmifgl <- function(
+  x #character=names of non-function objects in .GlobalEnv
+  ) {
+  for(i in seq_along(x)) {
+    if(
+      exists(x[i],envir=globalenv())
+      &&
+      mode(get(x[i],envir=globalenv()))!='function'
+    ) {
+      rm(list=x[i],envir=globalenv())
+      }
+  }
+}
+
