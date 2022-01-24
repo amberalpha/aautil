@@ -2856,3 +2856,12 @@ rmifgl <- function(
   }
 }
 
+#' @export
+cobalt <- function(){
+c(
+  blue='#0082F4',
+  green='#35CA05',
+  onch='#ED9304',
+  punk='#FF628C',
+  midnight='002140')
+}
