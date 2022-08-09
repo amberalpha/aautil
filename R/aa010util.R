@@ -1355,7 +1355,21 @@ ncpus <- function(
   nsplit=3 #number of separate entire tasks
 )
 {
-  max(as.numeric(strsplit(shell("wmic cpu get NumberOfCores,NumberOfLogicalProcessors",intern=TRUE)," ")[[2]]),na.rm=T)
+  min(
+    max(
+    as.numeric(
+      strsplit(
+        shell(
+          "wmic cpu get NumberOfCores,NumberOfLogicalProcessors",
+          intern=TRUE
+          ),
+        " "
+        )[[2]]
+      ),
+    na.rm=T
+    ),
+    8
+  )
 }
 
 
